@@ -187,18 +187,27 @@
     <div class="controls">
         <h3>Настройки скрина</h3>
 
-        <details class="control-section">
-            <summary>📚 Библиотека персонажей</summary>
-            <div class="section-content">
-                <select id="characterSelect" style="font-weight: bold;" onchange="loadCharacter()">
-                    <option value="">-- Новый персонаж --</option>
-                </select>
-                <div style="display: flex; gap: 5px;">
-                    <button onclick="saveCharacter()" style="flex: 1; background: #4CAF50; font-size: 12px; padding: 6px;">💾 Сохранить</button>
-                    <button onclick="deleteCharacter()" style="flex: 1; background: #ed4956; font-size: 12px; padding: 6px;">🗑️ Удалить</button>
-                </div>
-            </div>
-        </details>
+      <details class="control-section">
+    <summary>📚 Библиотека персонажей</summary>
+    <div class="section-content">
+        <select id="characterSelect" style="font-weight: bold;" onchange="loadCharacter()">
+            <option value="">-- Новый персонаж --</option>
+        </select>
+        
+        <div style="display: flex; gap: 5px;">
+            <button onclick="saveCharacter()" style="flex: 1; background: #4CAF50; font-size: 12px; padding: 6px;">💾 Сохранить</button>
+            <button onclick="deleteCharacter()" style="flex: 1; background: #ed4956; font-size: 12px; padding: 6px;">🗑️ Удалить</button>
+        </div>
+
+        <!-- экспорт и импорт библиотеки персонажей -->
+        <div style="display: flex; gap: 5px; margin-top: 5px;">
+            <button onclick="exportLibrary()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📥 Скачать базу</button>
+            <input type="file" id="importLib" accept=".json" style="display: none;" onchange="importLibrary(event)">
+            <button onclick="document.getElementById('importLib').click()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📤 Загрузить</button>
+        </div>
+
+        </div>
+     </details>
         
         <details class="control-section" open>
             <summary>👤 Профиль и Время</summary>
