@@ -80,7 +80,6 @@
         .menu-item { padding: 12px 16px; font-size: 15px; color: #fff; cursor: pointer; border-bottom: 1px solid #363636; }
         .menu-item-danger { color: #ed4956; border-bottom: none; }
         
-        /* СТИЛИ ДЛЯ БОКОВОГО МЕНЮ */
         .sidebar { 
             background: #1e1e1e; 
             border-radius: 16px; 
@@ -125,7 +124,6 @@
             border-color: #0095f6;
             box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3);
         }
-        /* АДАПТАЦИЯ ПОД ТЕЛЕФОНЫ И ПЛАНШЕТЫ */
         @media (max-width: 950px) {
             body {
                 flex-direction: column;
@@ -141,17 +139,17 @@
                 justify-content: center;
                 flex-wrap: wrap;
             }
-            .sidebar-title { display: none; } /* Прячем заголовок для экономии места */
+            .sidebar-title { display: none; } 
             .nav-item { flex: 1; justify-content: center; text-align: center; }
             .controls {
                 width: 100%;
                 max-width: 400px;
-                max-height: none; /* Убираем скролл внутри панели на телефоне */
+                max-height: none; 
             }
             .phone-wrapper {
                 width: 100%;
                 max-width: 400px;
-                height: 85vh; /* Высота под экран телефона */
+                height: 85vh; 
                 min-height: 650px;
             }
         }
@@ -161,11 +159,29 @@
 <div class="sidebar">
         <div class="sidebar-title">Выбор режима</div>
         <a href="index.html" class="nav-item">👤 Личный (1 на 1)</a>
-        <!-- Класс active теперь тут 👇 -->
         <a href="group.html" class="nav-item active">👥 Групповой чат</a>
     </div>
     <div class="controls">
         <h3>Групповой чат (Final)</h3>
+
+        <details class="control-section">
+            <summary>📚 Библиотека персонажей</summary>
+            <div class="section-content">
+                <select id="characterSelect" style="font-weight: bold;" onchange="updateSenderList()">
+                    <option value="">-- Библиотека --</option>
+                </select>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="saveCharacter()" style="flex: 1; background: #4CAF50; font-size: 12px; padding: 6px;">💾 Сохранить</button>
+                    <button onclick="deleteCharacter()" style="flex: 1; background: #ed4956; font-size: 12px; padding: 6px;">🗑️ Удалить</button>
+                </div>
+                <!-- ДОБАВЛЕННЫЕ КНОПКИ ТУТ -->
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <button onclick="exportLibrary()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📥 Скачать базу</button>
+                    <input type="file" id="importLib" accept=".json" style="display: none;" onchange="importLibrary(event)">
+                    <button onclick="document.getElementById('importLib').click()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📤 Загрузить</button>
+                </div>
+            </div>
+        </details>
 
         <details class="control-section" open>
             <summary>👥 Настройки группы</summary>
@@ -262,7 +278,41 @@
         function updateSenderList() {
             senderSelect.innerHTML = '<option value="right|Me">Я (Градиент)</option>';
             savedChars = JSON.parse(localStorage.getItem('ig_dm_characters_v1')) || {};
-            for (let name in savedChars) { senderSelect.add(new Option(`От лица: ${name}`, `left|${name}`)); }
+            
+            const charSelect = document.getElementById('characterSelect');
+            charSelect.innerHTML = '<option value="">-- Библиотека --</option>';
+
+            for (let name in savedChars) { 
+                senderSelect.add(new Option(`От лица: ${name}`, `left|${name}`)); 
+                charSelect.add(new Option(name, name));
+            }
+        }
+
+        function loadCharacterToLibrary() {
+            const val = document.getElementById('characterSelect').value;
+            if (!val) return;
+            // В групповом режиме мы просто обновляем список отправителей
+            updateSenderList();
+            document.getElementById('characterSelect').value = val;
+        }
+
+        function saveCharacter() {
+            const n = prompt("Введите имя персонажа:");
+            const a = prompt("Введите URL аватарки:");
+            if(n && a) {
+                savedChars[n] = { avatar: a, subtitle: "В сети" };
+                localStorage.setItem('ig_dm_characters_v1', JSON.stringify(savedChars));
+                updateSenderList();
+            }
+        }
+
+        function deleteCharacter() {
+            const val = document.getElementById('characterSelect').value;
+            if (val && confirm(`Удалить ${val}?`)) { 
+                delete savedChars[val]; 
+                localStorage.setItem('ig_dm_characters_v1', JSON.stringify(savedChars)); 
+                updateSenderList(); 
+            }
         }
 
         function previewMedia(input, type) {
@@ -404,7 +454,6 @@
                         if (row.previousElementSibling?.getAttribute('data-sender') === sender && !hasReply) msg.style.borderTopRightRadius = '4px';
                         if (isNextSameAuthor) msg.style.borderBottomRightRadius = '4px';
                         
-                        // ФИКС ГРАДИЕНТА
                         msg.style.backgroundImage = "url('https://i.postimg.cc/T1nmqVM4/фон-градиент.png')";
                         msg.style.backgroundSize = `100% ${phoneRect.height}px`;
                         msg.style.backgroundRepeat = 'no-repeat';
@@ -429,9 +478,38 @@
             });
         }
 
-        // ОБРАБОТЧИК СКРОЛЛА - ВАЖНО ДЛЯ ГРАДИЕНТА
-        messagesBox.addEventListener('scroll', updateVisuals);
+        // --- ЭКСПОРТ И ИМПОРТ БИБЛИОТЕКИ ---
+        function exportLibrary() {
+            let charsToExport = savedChars;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(charsToExport));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "ig_library.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
 
+        function importLibrary(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    savedChars = { ...savedChars, ...importedData };
+                    localStorage.setItem('ig_dm_characters_v1', JSON.stringify(savedChars));
+                    updateSenderList();
+                    alert("Библиотека успешно загружена! 📚✨");
+                } catch (err) {
+                    alert("Упс! Ошибка загрузки файла.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; 
+        }
+
+        messagesBox.addEventListener('scroll', updateVisuals);
         updateHeader(); updateTimeHeader(); updateSenderList();
         document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
     </script>
