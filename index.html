@@ -508,14 +508,36 @@
         }
 
         function handleReply() {
-            if (!selectedMsgRow || selectedMsgRow.classList.contains('time-divider')) { contextMenu.style.display = 'none'; return; }
+            if (!selectedMsgRow || selectedMsgRow.classList.contains('time-divider')) { 
+                contextMenu.style.display = 'none'; return; 
+            }
             contextMenu.style.display = 'none';
             const msgNode = selectedMsgRow.querySelector('.msg');
+            
             if(!msgNode) return; 
-            if (msgNode.tagName.toLowerCase() === 'img') { replyingToText = '📷 Фото'; } 
-            else { replyingToText = msgNode.innerHTML.replace(/<br\s*[\/]?>/gi, ' '); }
-            replyPreview.textContent = replyingToText; replyIndicator.style.display = 'block';
-            cancelStory(); cancelAttachedImage();
+
+            let fullText = "";
+            if (msgNode.tagName.toLowerCase() === 'img') { 
+                fullText = '📷 Фото'; 
+            } else { 
+                // Убираем переносы строк для превью ответа
+                fullText = msgNode.innerHTML.replace(/<br\s*[\/]?>/gi, ' '); 
+            }
+
+            // МАГИЯ ТРОЕТОЧИЯ: 
+            // Если текст длиннее 75 символов (примерно 2 строки), 
+            // мы сами обрезаем его и ставим точки.
+            if (fullText.length > 75) {
+                replyingToText = fullText.substring(0, 72).trim() + '...';
+            } else {
+                replyingToText = fullText;
+            }
+
+            document.getElementById('replyPreview').textContent = replyingToText; 
+            document.getElementById('replyIndicator').style.display = 'block';
+            
+            if(typeof cancelStory === 'function') cancelStory(); 
+            if(typeof cancelAttachedImage === 'function') cancelAttachedImage();
         }
 
         function cancelReply() { replyingToText = null; replyIndicator.style.display = 'none'; }
