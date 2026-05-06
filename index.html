@@ -267,9 +267,15 @@
             Отвечаем на: <span id="replyPreview" class="reply-indicator-text"></span>
         </div>
 
-        <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: #aaa; cursor: pointer;">
-            <input type="checkbox" id="isForwardedCheckbox" style="width: auto; margin: 0; cursor: pointer;"> Отметить, как пересланное
-        </label>
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+            <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
+                <input type="checkbox" id="isForwardedCheckbox" style="width: auto; margin: 0; cursor: pointer;"> Пересланное
+            </label>
+            <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
+                <input type="checkbox" id="isSeenCheckbox" style="width: auto; margin: 0; cursor: pointer;" onchange="document.getElementById('seenTextInput').style.display = this.checked ? 'block' : 'none'"> Просмотрено
+            </label>
+            <input type="text" id="seenTextInput" placeholder="Напр: 5 ч. назад" style="display: none; flex: 1; padding: 4px 8px; font-size: 12px; height: 26px;">
+        </div>
 
         <textarea id="messageInput" placeholder="Текст сообщения..." rows="3" style="font-family: inherit; resize: none;"></textarea>
         <select id="senderSelect">
@@ -333,6 +339,8 @@
         const dynamicHeader = document.getElementById('dynamicHeader');
         const characterSelect = document.getElementById('characterSelect');
         const isForwardedCheckbox = document.getElementById('isForwardedCheckbox');
+        const isSeenCheckbox = document.getElementById('isSeenCheckbox');
+        const seenTextInput = document.getElementById('seenTextInput');
         
         let currentGradientBg = "url('https://i.postimg.cc/T1nmqVM4/фон-градиент.png')"; 
         let currentAvatarSrc = leftAvatarInput.value;
@@ -513,8 +521,17 @@
             
             const sender = senderSelect.value;
             const isForwarded = isForwardedCheckbox.checked;
+            const isSeen = isSeenCheckbox.checked;
             let forwardedAdded = false;
             
+            // Логика формирования подписи Просмотрено
+            let seenHtml = '';
+            if (sender === 'right' && isSeen) {
+                const customTime = seenTextInput.value.trim();
+                const seenStr = customTime ? (customTime.toLowerCase().startsWith('просмотр') ? customTime : `Просмотрено ${customTime}`) : 'Просмотрено';
+                seenHtml = `<div class="seen-text" style="font-size: 11px; color: #8e8e8e; margin-top: 4px; align-self: flex-end; letter-spacing: 0.2px;">${seenStr}</div>`;
+            }
+
             if (currentAttachedImageSrc) {
                 let imgHtml = '';
                 if (isForwarded && !forwardedAdded) {
@@ -524,6 +541,12 @@
                     forwardedAdded = true;
                 }
                 imgHtml += `<img src="${currentAttachedImageSrc}" class="msg msg-image-attachment" crossorigin="anonymous">`;
+                
+                // Если нет текста и сторис, добавляем статус "Просмотрено" под картинку
+                if (!text && !currentStorySrc) {
+                    imgHtml += seenHtml;
+                }
+                
                 createRowElement(sender, imgHtml);
             }
 
@@ -557,11 +580,21 @@
                 }
 
                 if (text) { html += `<div class="msg">${text}</div>`; }
+                
+                // Добавляем статус "Просмотрено" в самый конец блока
+                html += seenHtml;
+
                 if (html !== '') { createRowElement(sender, html); }
             }
 
             messageInput.value = ''; messagesBox.scrollTop = messagesBox.scrollHeight;
-            isForwardedCheckbox.checked = false; // Сбрасываем галочку
+            
+            // Сбрасываем чекбоксы
+            isForwardedCheckbox.checked = false; 
+            isSeenCheckbox.checked = false;
+            seenTextInput.style.display = 'none';
+            seenTextInput.value = '';
+
             if (replyingToText) cancelReply(); if (currentStorySrc) cancelStory(); if (currentAttachedImageSrc) cancelAttachedImage();
             updateVisuals();
         }
@@ -602,7 +635,10 @@
         function clearChat() {
             if(confirm('Точно очистить весь чат?')) {
                 messagesBox.innerHTML = ''; editingMsgNode = null; cancelReply(); cancelStory(); cancelAttachedImage();
-                isForwardedCheckbox.checked = false; // Сбрасываем галочку при очистке чата
+                isForwardedCheckbox.checked = false; 
+                isSeenCheckbox.checked = false;
+                seenTextInput.style.display = 'none';
+                seenTextInput.value = '';
                 mainActionBtn.textContent = 'Добавить сообщение'; mainActionBtn.style.background = '#0095f6';
             }
         }
