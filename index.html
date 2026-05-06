@@ -145,12 +145,41 @@
             border-color: #0095f6;
             box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3);
         }
+        /* АДАПТАЦИЯ ПОД ТЕЛЕФОНЫ И ПЛАНШЕТЫ */
+        @media (max-width: 950px) {
+            body {
+                flex-direction: column;
+                align-items: center;
+                height: auto;
+                min-height: 100vh;
+                padding: 15px;
+            }
+            .sidebar {
+                width: 100%;
+                max-width: 400px;
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .sidebar-title { display: none; } /* Прячем заголовок для экономии места */
+            .nav-item { flex: 1; justify-content: center; text-align: center; }
+            .controls {
+                width: 100%;
+                max-width: 400px;
+                max-height: none; /* Убираем скролл внутри панели на телефоне */
+            }
+            .phone-wrapper {
+                width: 100%;
+                max-width: 400px;
+                height: 85vh; /* Высота под экран телефона */
+                min-height: 650px;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="sidebar">
         <div class="sidebar-title">Выбор режима</div>
-        <!-- Здесь класс active стоит у Личного чата -->
         <a href="index.html" class="nav-item active">👤 Личный (1 на 1)</a>
         <a href="group.html" class="nav-item">👥 Групповой чат</a>
     </div>
@@ -163,10 +192,18 @@
                 <select id="characterSelect" style="font-weight: bold;" onchange="loadCharacter()">
                     <option value="">-- Новый персонаж --</option>
                 </select>
+                
                 <div style="display: flex; gap: 5px;">
                     <button onclick="saveCharacter()" style="flex: 1; background: #4CAF50; font-size: 12px; padding: 6px;">💾 Сохранить</button>
                     <button onclick="deleteCharacter()" style="flex: 1; background: #ed4956; font-size: 12px; padding: 6px;">🗑️ Удалить</button>
                 </div>
+
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <button onclick="exportLibrary()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📥 Скачать базу</button>
+                    <input type="file" id="importLib" accept=".json" style="display: none;" onchange="importLibrary(event)">
+                    <button onclick="document.getElementById('importLib').click()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📤 Загрузить</button>
+                </div>
+
             </div>
         </details>
         
@@ -220,7 +257,6 @@
 
         <hr style="border: 0; border-top: 1px solid #444; margin: 4px 0;">
         
-        <!-- НОВЫЙ БЛОК: ПЛАШКА ВРЕМЕНИ -->
         <div style="display: flex; gap: 10px; margin-bottom: 5px;">
             <input type="text" id="timeDividerInput" placeholder="ВЧЕРА В 17:17" style="flex: 2;">
             <button onclick="addTimeDivider()" style="flex: 1; background: #333; font-size: 12px;">⏳ Плашка</button>
@@ -230,6 +266,10 @@
             <button class="cancel-btn" onclick="cancelReply()">✕</button>
             Отвечаем на: <span id="replyPreview" class="reply-indicator-text"></span>
         </div>
+
+        <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: #aaa; cursor: pointer;">
+            <input type="checkbox" id="isForwardedCheckbox" style="width: auto; margin: 0; cursor: pointer;"> Отметить, как пересланное
+        </label>
 
         <textarea id="messageInput" placeholder="Текст сообщения..." rows="3" style="font-family: inherit; resize: none;"></textarea>
         <select id="senderSelect">
@@ -292,6 +332,7 @@
         const cancelStoryBtn = document.getElementById('cancelStoryBtn');
         const dynamicHeader = document.getElementById('dynamicHeader');
         const characterSelect = document.getElementById('characterSelect');
+        const isForwardedCheckbox = document.getElementById('isForwardedCheckbox');
         
         let currentGradientBg = "url('https://i.postimg.cc/T1nmqVM4/фон-градиент.png')"; 
         let currentAvatarSrc = leftAvatarInput.value;
@@ -471,14 +512,31 @@
             }
             
             const sender = senderSelect.value;
+            const isForwarded = isForwardedCheckbox.checked;
+            let forwardedAdded = false;
             
             if (currentAttachedImageSrc) {
-                let imgHtml = `<img src="${currentAttachedImageSrc}" class="msg msg-image-attachment" crossorigin="anonymous">`;
+                let imgHtml = '';
+                if (isForwarded && !forwardedAdded) {
+                    const headerText = sender === 'right' ? 'Вы переслали сообщение' : 'Переслал(-а) сообщение';
+                    const alignSelf = sender === 'right' ? 'flex-end' : 'flex-start';
+                    imgHtml += `<div class="reply-header" style="align-self: ${alignSelf}; margin-bottom: 4px;">${headerText}</div>`;
+                    forwardedAdded = true;
+                }
+                imgHtml += `<img src="${currentAttachedImageSrc}" class="msg msg-image-attachment" crossorigin="anonymous">`;
                 createRowElement(sender, imgHtml);
             }
 
             if (text || currentStorySrc) {
                 let html = '';
+                
+                if (isForwarded && !forwardedAdded) {
+                    const headerText = sender === 'right' ? 'Вы переслали сообщение' : 'Переслал(-а) сообщение';
+                    const alignSelf = sender === 'right' ? 'flex-end' : 'flex-start';
+                    html += `<div class="reply-header" style="align-self: ${alignSelf}; margin-bottom: 4px;">${headerText}</div>`;
+                    forwardedAdded = true;
+                }
+
                 if (currentStorySrc) {
                     const headerText = sender === 'right' ? 'Вы ответили на историю' : 'Ответил(-а) на вашу историю';
                     const alignSelf = sender === 'right' ? 'flex-end' : 'flex-start';
@@ -503,6 +561,7 @@
             }
 
             messageInput.value = ''; messagesBox.scrollTop = messagesBox.scrollHeight;
+            isForwardedCheckbox.checked = false; // Сбрасываем галочку
             if (replyingToText) cancelReply(); if (currentStorySrc) cancelStory(); if (currentAttachedImageSrc) cancelAttachedImage();
             updateVisuals();
         }
@@ -543,6 +602,7 @@
         function clearChat() {
             if(confirm('Точно очистить весь чат?')) {
                 messagesBox.innerHTML = ''; editingMsgNode = null; cancelReply(); cancelStory(); cancelAttachedImage();
+                isForwardedCheckbox.checked = false; // Сбрасываем галочку при очистке чата
                 mainActionBtn.textContent = 'Добавить сообщение'; mainActionBtn.style.background = '#0095f6';
             }
         }
@@ -597,6 +657,36 @@
                 phoneWrapper.style.borderRadius = '40px'; phoneWrapper.style.border = '1px solid #222'; phoneWrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.6)';
                 const link = document.createElement('a'); link.download = 'ig_chat.png'; link.href = canvas.toDataURL('image/png'); link.click();
             });
+        }
+
+        // --- ЭКСПОРТ И ИМПОРТ БИБЛИОТЕКИ ---
+        function exportLibrary() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedCharacters));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "ig_library.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importLibrary(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    savedCharacters = { ...savedCharacters, ...importedData };
+                    localStorage.setItem('ig_dm_characters_v1', JSON.stringify(savedCharacters));
+                    updateCharDropdown();
+                    alert("Библиотека успешно загружена! 📚✨");
+                } catch (err) {
+                    alert("Ошибка: файл поврежден или имеет неверный формат.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; 
         }
     </script>
 </body>
