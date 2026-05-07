@@ -1,4 +1,4 @@
-// --- БИБЛИОТЕКА ПЕРСОНАЖЕВ (Модуль) ---
+// --- БИБЛИОТЕКА ПЕРСОНАЖЕВ (Модуль) --- 
 let savedCharacters = JSON.parse(localStorage.getItem('ig_dm_characters_v1')) || {};
 
 function updateCharDropdown() {
