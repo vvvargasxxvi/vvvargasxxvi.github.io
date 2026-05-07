@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="export.js?v=1"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram Group Chat Generator - Pro Mode Final</title>
@@ -76,6 +81,7 @@
             <div style="display: flex; gap: 10px; margin-top: 5px;">
                 <button onclick="clearChat()" style="background: #333; flex: 1; font-size: 13px;">Очистить</button>
                 <button onclick="downloadChat()" style="background: #fff; color: #000; flex: 2; font-size: 13px;">📸 Скачать</button>
+                <button id="zipBtn" onclick="downloadChatAsZip('group')" style="background: #4CAF50; color: #fff; flex: 1.5; font-size: 13px;">📦 Нарезка (ZIP)</button>
             </div>
             <button onclick="updateSenderList()" style="background: #222; font-size: 11px; margin-top: 5px;">🔄 Обновить список участников</button>
         </div>
