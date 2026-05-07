@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Story Generator</title>
+    <link rel="stylesheet" href="style.css?v=5">
+    
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <style>
+        /* Специфичные стили для Историй */
+        .story-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #1a1a1a;
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+        }
+        .story-overlay-top {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            height: 120px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            padding: 15px 10px;
+            box-sizing: border-box;
+        }
+        .story-progress {
+            width: 100%; height: 2px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .story-progress-bar {
+            width: 100%; height: 100%;
+            background: #fff;
+            border-radius: 2px;
+        }
+        .story-header-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .story-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .story-username {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .story-time {
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+            font-weight: 400;
+        }
+        .story-dots {
+            margin-left: auto;
+            color: #fff;
+            font-weight: bold;
+            letter-spacing: 2px;
+            font-size: 18px;
+            line-height: 1;
+            padding-bottom: 8px;
+        }
+        .story-overlay-bottom {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            height: 100px;
+            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            box-sizing: border-box;
+            gap: 15px;
+        }
+        .story-input-box {
+            flex: 1;
+            height: 44px;
+            border-radius: 22px;
+            border: 1px solid rgba(255,255,255,0.4);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            color: #fff;
+            font-size: 14px;
+        }
+        .story-icon {
+            width: 24px; height: 24px;
+        }
+        /* Блок с текстом, который можно двигать */
+        .story-text-element {
+            position: absolute;
+            z-index: 3;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+            white-space: pre-wrap;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-title">Выбор режима</div>
+        <a href="index.html" class="nav-item">👤 Личный (1 на 1)</a>
+        <a href="group.html" class="nav-item">👥 Групповой чат</a>
+        <a href="story.html" class="nav-item active">📸 Истории</a>
+    </div>
+
+    <div class="mobile-tabs">
+        <button id="tabControls" class="active" onclick="toggleMobileTab('controls')">⚙️ Настройки</button>
+        <button id="tabPreview" onclick="toggleMobileTab('preview')">📱 Превью</button>
+    </div>
+
+    <div class="controls-container">
+        <div class="controls">
+            <h3>Генератор Историй</h3>
+
+            <details class="control-section" open>
+                <summary>🖼️ Задний фон</summary>
+                <div class="section-content">
+                    <input type="file" id="bgUpload" accept="image/*" style="font-size: 13px; margin-bottom: 10px;">
+                    <button onclick="clearBackground()" style="background: #333; font-size: 12px; padding: 5px;">Удалить фон</button>
+                </div>
+            </details>
+
+            <details class="control-section" open>
+                <summary>👤 Настройки автора</summary>
+                <div class="section-content">
+                    <input type="text" id="storyUsername" placeholder="Имя профиля" value="ginevra.w_p" oninput="updateStoryHeader()">
+                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                        <input type="text" id="storyAvatarUrl" placeholder="URL Аватарки" value="https://i.pravatar.cc/150?img=35" style="flex: 2;" oninput="updateStoryHeader()">
+                        <input type="text" id="storyTime" placeholder="Время (напр. 3 ч.)" value="3 ч." style="flex: 1;" oninput="updateStoryHeader()">
+                    </div>
+                </div>
+            </details>
+
+            <details class="control-section" open>
+                <summary>📝 Текст на истории</summary>
+                <div class="section-content">
+                    <textarea id="storyTextInput" placeholder="Текст истории..." rows="3" style="font-family: inherit; resize: none;"></textarea>
+                    
+                    <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                        <input type="color" id="textColor" value="#ffffff" style="width: 30px; height: 30px; padding: 0; border: none; border-radius: 4px; cursor: pointer;">
+                        <span style="font-size: 12px; color: #aaa;">Цвет текста</span>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 11px; color: #aaa;">Позиция X (Влево/Вправо):</label>
+                            <input type="range" id="textPosX" min="0" max="100" value="50" style="width: 100%;" oninput="updateTextPosition()">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 11px; color: #aaa;">Позиция Y (Вверх/Вниз):</label>
+                            <input type="range" id="textPosY" min="15" max="85" value="50" style="width: 100%;" oninput="updateTextPosition()">
+                        </div>
+                    </div>
+                    <button onclick="updateStoryText()" style="margin-top: 10px;">Применить текст</button>
+                </div>
+            </details>
+
+            <details class="control-section">
+                <summary>⚙️ Элементы интерфейса</summary>
+                <div class="section-content">
+                    <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
+                        <input type="checkbox" id="showBottomBar" checked onchange="toggleBottomBar()"> Показывать поле "Отправить сообщение"
+                    </label>
+                </div>
+            </details>
+
+            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
+
+            <button onclick="downloadStory()" style="background: #fff; color: #000; font-size: 14px; padding: 10px; width: 100%;">📸 Скачать Историю</button>
+        </div>
+    </div>
+
+    <div class="phone-container">
+        <div class="phone-wrapper" id="captureArea">
+            <div id="storyBackground" class="story-bg"></div>
+
+            <div id="storyTextDisplay" class="story-text-element"></div>
+
+            <div class="story-overlay-top">
+                <div class="story-progress"><div class="story-progress-bar"></div></div>
+                <div class="story-header-user">
+                    <img id="displayAvatar" class="story-avatar" src="https://i.pravatar.cc/150?img=35" crossorigin="anonymous">
+                    <div class="story-username">
+                        <span id="displayUsername">ginevra.w_p</span>
+                        <span id="displayTime" class="story-time">3 ч.</span>
+                    </div>
+                    <div class="story-dots">...</div>
+                </div>
+            </div>
+
+            <div class="story-overlay-bottom" id="bottomBarUI">
+                <div class="story-input-box">Отправить сообщение</div>
+                <svg class="story-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <svg class="story-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMobileTab(tab) {
+            const body = document.body;
+            if (tab === 'preview') {
+                body.classList.add('show-preview');
+                document.getElementById('tabPreview').classList.add('active');
+                document.getElementById('tabControls').classList.remove('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                body.classList.remove('show-preview');
+                document.getElementById('tabControls').classList.add('active');
+                document.getElementById('tabPreview').classList.remove('active');
+            }
+        }
+
+        // Обновление шапки
+        function updateStoryHeader() {
+            document.getElementById('displayUsername').textContent = document.getElementById('storyUsername').value;
+            document.getElementById('displayTime').textContent = document.getElementById('storyTime').value;
+            document.getElementById('displayAvatar').src = document.getElementById('storyAvatarUrl').value;
+        }
+
+        // Загрузка фона
+        document.getElementById('bgUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('storyBackground').style.backgroundImage = `url(${event.target.result})`;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function clearBackground() {
+            document.getElementById('bgUpload').value = '';
+            document.getElementById('storyBackground').style.backgroundImage = 'none';
+        }
+
+        // Текст
+        function updateStoryText() {
+            const textElement = document.getElementById('storyTextDisplay');
+            const newText = document.getElementById('storyTextInput').value.trim();
+            const color = document.getElementById('textColor').value;
+            
+            textElement.innerHTML = newText.replace(/\n/g, '<br>');
+            textElement.style.color = color;
+        }
+
+        // Позиция текста ползунками
+        function updateTextPosition() {
+            const textElement = document.getElementById('storyTextDisplay');
+            const x = document.getElementById('textPosX').value;
+            const y = document.getElementById('textPosY').value;
+            textElement.style.left = `${x}%`;
+            textElement.style.top = `${y}%`;
+        }
+
+        // Нижняя панель
+        function toggleBottomBar() {
+            const isVisible = document.getElementById('showBottomBar').checked;
+            document.getElementById('bottomBarUI').style.display = isVisible ? 'flex' : 'none';
+        }
+
+        // Скачивание
+        function downloadStory() {
+            const phoneWrapper = document.getElementById('captureArea');
+            const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
+            if (wasHidden) { document.body.classList.add('show-preview'); }
+
+            phoneWrapper.style.borderRadius = '0'; 
+            phoneWrapper.style.border = 'none'; 
+            phoneWrapper.style.boxShadow = 'none';
+            
+            setTimeout(() => {
+                html2canvas(phoneWrapper, { scale: 3, useCORS: true, allowTaint: true, backgroundColor: '#1a1a1a' }).then(canvas => {
+                    phoneWrapper.style.borderRadius = '40px'; 
+                    phoneWrapper.style.border = '1px solid #222'; 
+                    phoneWrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.6)';
+                    
+                    if (wasHidden) { document.body.classList.remove('show-preview'); }
+                    
+                    const link = document.createElement('a'); 
+                    link.download = `ig_story_${Date.now()}.png`; 
+                    link.href = canvas.toDataURL('image/png'); 
+                    link.click();
+                });
+            }, 100);
+        }
+
+        // Инициализация
+        updateStoryHeader();
+    </script>
+</body>
+</html>
