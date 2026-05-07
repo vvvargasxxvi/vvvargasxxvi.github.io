@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram DM Generator</title>
@@ -120,10 +122,11 @@
             </select>
             
             <button id="mainActionBtn" onclick="addMessage()">Добавить сообщение</button>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="clearChat()" style="background: #333; flex: 1; font-size: 13px;">Очистить чат</button>
-                <button onclick="downloadChat()" style="background: #fff; color: #000; flex: 2; font-size: 13px;">📸 Скачать скрин</button>
-            </div>
+           <div style="display: flex; gap: 10px; margin-top: 5px;">
+            <button onclick="clearChat()" style="background: #333; flex: 1; font-size: 13px;">Очистить</button>
+            <button onclick="downloadChat()" style="background: #fff; color: #000; flex: 1.5; font-size: 13px;">📸 Один скрин</button>
+            <button id="zipBtn" onclick="downloadChatAsZip()" style="background: #4CAF50; color: #fff; flex: 1.5; font-size: 13px;">📦 Нарезка (ZIP)</button>
+           </div>
         </div>
     </div>
 
@@ -601,6 +604,104 @@
             };
             reader.readAsText(file);
             event.target.value = ''; 
+        }
+        // --- АВТОНАРЕЗКА ЧАТА НА СКРИНШОТЫ В ZIP ---
+        async function downloadChatAsZip() {
+            const msgs = Array.from(messagesBox.children);
+            if (msgs.length === 0) return alert('Чат пуст! Нечего нарезать.');
+
+            const zipBtn = document.getElementById('zipBtn');
+            const originalBtnText = zipBtn.innerHTML;
+            zipBtn.innerHTML = '⏳ Режу...';
+            zipBtn.style.opacity = '0.5';
+            zipBtn.disabled = true;
+
+            const zip = new JSZip();
+            const maxAvailableHeight = 640; // Максимальная высота сообщений на одном экране
+            
+            let currentBatch = [];
+            let currentHeight = 0;
+            let slideIndex = 1;
+
+            // Запоминаем скролл и прячем контекстное меню
+            const originalScrollTop = messagesBox.scrollTop;
+            contextMenu.style.display = 'none';
+
+            // Если мы на мобилке, принудительно открываем превью
+            const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
+            if (wasHidden) document.body.classList.add('show-preview');
+
+            // Прячем все сообщения
+            msgs.forEach(m => m.style.display = 'none');
+
+            for (let i = 0; i < msgs.length; i++) {
+                const msg = msgs[i];
+                msg.style.display = ''; // Временно показываем, чтобы измерить
+                
+                // Считаем высоту сообщения вместе с нижним отступом
+                const style = window.getComputedStyle(msg);
+                const msgHeight = msg.offsetHeight + parseInt(style.marginBottom || 0);
+                
+                // Если добавление этого сообщения переполняет экран
+                if (currentHeight + msgHeight > maxAvailableHeight && currentBatch.length > 0) {
+                    msg.style.display = 'none'; // Прячем обратно, оно пойдет на следующий скрин
+                    
+                    // Делаем фотку текущего экрана
+                    await captureSlide(zip, slideIndex);
+                    
+                    // Сбрасываем счетчики для следующего скрина
+                    currentBatch.forEach(m => m.style.display = 'none');
+                    currentBatch = [];
+                    currentHeight = 0;
+                    slideIndex++;
+                }
+                
+                // Добавляем сообщение в текущий кадр
+                msg.style.display = '';
+                currentBatch.push(msg);
+                currentHeight += msgHeight;
+            }
+
+            // Фоткаем последний кусок (остатки), если они есть
+            if (currentBatch.length > 0) {
+                await captureSlide(zip, slideIndex);
+            }
+
+            // Возвращаем всё как было
+            msgs.forEach(m => m.style.display = '');
+            messagesBox.scrollTop = originalScrollTop;
+            if (wasHidden) document.body.classList.remove('show-preview');
+
+            zipBtn.innerHTML = '📦 Упаковка...';
+
+            // Генерируем архив и скачиваем
+            zip.generateAsync({type:"blob"}).then(function(content) {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = "instagram_storyboard.zip";
+                link.click();
+                
+                zipBtn.innerHTML = originalBtnText;
+                zipBtn.style.opacity = '1';
+                zipBtn.disabled = false;
+            });
+        }
+
+        // Вспомогательная функция для скриншотера
+        async function captureSlide(zip, index) {
+            phoneWrapper.style.borderRadius = '0'; 
+            phoneWrapper.style.border = 'none'; 
+            phoneWrapper.style.boxShadow = 'none';
+
+            const canvas = await html2canvas(phoneWrapper, { scale: 3, useCORS: true, backgroundColor: '#0d1015', logging: false });
+            
+            phoneWrapper.style.borderRadius = '40px'; 
+            phoneWrapper.style.border = '1px solid #222'; 
+            phoneWrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.6)';
+
+            const dataUrl = canvas.toDataURL('image/png');
+            const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
+            zip.file(`slide_${index}.png`, base64Data, {base64: true});
         }
     </script>
 </body>
