@@ -165,7 +165,7 @@
     </div>
 
     <script>
-        // ЛОГИКА МОБИЛЬНЫХ ВКЛАДОК
+        // ЛОГИКА МОБИЛЬНЫХ ВКЛАДОК (БРОНЕБОЙНАЯ ВЕРСИЯ)
         function toggleMobileTab(tab) {
             const body = document.body;
             if (tab === 'preview') {
@@ -174,10 +174,14 @@
                 document.getElementById('tabControls').classList.remove('active');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 
-                // МАГИЯ ЗДЕСЬ: даем браузеру миллисекунду на показ телефона и заставляем пересчитать градиент
-                setTimeout(() => {
-                    if (typeof updateVisuals === 'function') updateVisuals();
-                }, 50);
+                // Магия для Android: заставляем браузер точно закончить отрисовку
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        setTimeout(() => {
+                            if (typeof updateVisuals === 'function') updateVisuals();
+                        }, 150); // 150мс точно хватит любому Андроиду
+                    });
+                });
             } else {
                 body.classList.remove('show-preview');
                 document.getElementById('tabControls').classList.add('active');
@@ -517,6 +521,10 @@
         function updateVisuals() {
             const msgs = Array.from(messagesBox.children);
             const phoneRect = phoneWrapper.getBoundingClientRect(); 
+            
+            // ЗАЩИТА: Если телефон скрыт (мы на вкладке настроек на мобилке), 
+            // прерываем функцию, чтобы не сломать градиент!
+            if (phoneRect.height === 0) return;
             
             msgs.forEach((row, i) => {
                 if(row.classList.contains('time-divider')) return;
