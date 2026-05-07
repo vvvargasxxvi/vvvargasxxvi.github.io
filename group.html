@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="export.js?v=1"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram Group Chat Generator - Pro Mode Final</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=5">
+    
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <script src="export.js?v=2"></script>
+    <script src="scene_group.js?v=1"></script>
 </head>
 <body>
     <div class="sidebar">
@@ -132,7 +132,6 @@
                 document.getElementById('tabControls').classList.remove('active');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 
-                // МАГИЯ ЗДЕСЬ: даем браузеру миллисекунду на показ телефона и заставляем пересчитать градиент
                 setTimeout(() => {
                     if (typeof updateVisuals === 'function') updateVisuals();
                 }, 50);
@@ -340,6 +339,8 @@
             const msgs = Array.from(messagesBox.children);
             const phoneRect = document.getElementById('captureArea').getBoundingClientRect();
             
+            if (phoneRect.height === 0) return;
+            
             msgs.forEach((row, i) => {
                 if (row.classList.contains('time-divider')) return;
                 
@@ -392,83 +393,6 @@
 
         updateHeader(); updateTimeHeader(); updateSenderList();
         document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
-
-        // --- ЭКСПОРТ И ИМПОРТ ВСЕГО ЧАТА (group.html) ---
-        function exportChat() {
-            try {
-                const chatData = {
-                    groupName: document.getElementById('groupName').value,
-                    avTop: document.getElementById('avTop').value,
-                    avBottom: document.getElementById('avBottom').value,
-                    timeHeader: document.getElementById('timeHeader').value,
-                    htmlContent: messagesBox.innerHTML
-                };
-                
-                // Создаем полноценный файл в памяти браузера
-                const jsonStr = JSON.stringify(chatData);
-                const blob = new Blob([jsonStr], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                
-                // Создаем ссылку, кликаем и убираем за собой
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `scene_group_${Date.now()}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Очищаем память
-                URL.revokeObjectURL(url);
-            } catch (err) {
-                console.error(err);
-                alert("Ошибка при сохранении: " + err.message);
-            }
-        }
-
-        function importChat(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if(data.htmlContent === undefined) throw new Error("Неверный формат");
-                    
-                    // Восстанавливаем настройки шапки
-                    document.getElementById('groupName').value = data.groupName || '';
-                    document.getElementById('avTop').value = data.avTop || '';
-                    document.getElementById('avBottom').value = data.avBottom || '';
-                    document.getElementById('timeHeader').value = data.timeHeader || '';
-                    
-                    // Вставляем сами сообщения
-                    messagesBox.innerHTML = data.htmlContent;
-
-                    // Обновляем визуал шапки
-                    updateHeader();
-                    updateTimeHeader();
-                    
-                    // Оживляем клики для меню (Ответить/Изменить/Удалить)
-                    const items = messagesBox.querySelectorAll('.message-row, .time-divider');
-                    items.forEach(item => {
-                        item.onclick = function(ev) {
-                            ev.stopPropagation(); selectedMsgRow = this;
-                            const wrapperRect = phoneWrapper.getBoundingClientRect();
-                            let x = ev.clientX - wrapperRect.left; let y = ev.clientY - wrapperRect.top;
-                            if (x > 220) x -= 160; 
-                            contextMenu.style.display = 'block'; contextMenu.style.left = x + 'px'; contextMenu.style.top = y + 'px';
-                        };
-                    });
-
-                    updateVisuals();
-                    alert("Групповая сцена успешно загружена! 🪄");
-                } catch (err) {
-                    alert("Ошибка: файл поврежден или это не сохранение чата.");
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = ''; // Сбрасываем инпут
-        }
     </script>
 </body>
 </html>
