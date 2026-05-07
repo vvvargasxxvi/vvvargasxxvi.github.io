@@ -74,7 +74,7 @@ button:hover { opacity: 0.8; }
 .message-row.left { align-self: flex-start; }
 .message-row.right { align-self: flex-end; }
 
-.time-divider { text-align: center; color: #8e8e8e; font-size: 11px; font-weight: 500; margin: 24px 0 16px 0; width: 100%; text-transform: uppercase; letter-spacing: 0.2px; align-self: center; cursor: pointer; }
+.time-divider { text-align: center; color: #8e8e8e; font-size: 11px; font-weight: 500; margin: 10px 0 16px 0; width: 100%; text-transform: uppercase; letter-spacing: 0.2px; align-self: center; cursor: pointer; }
 
 .msg-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 .msg-content { display: flex; flex-direction: column; max-width: 100%; min-width: 0; }
