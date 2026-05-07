@@ -1,4 +1,4 @@
-// --- ЭКСПОРТ И ИМПОРТ СЦЕНЫ (Личный чат) ---
+// --- ЭКСПОРТ И ИМПОРТ СЦЕНЫ (Личный чат) --- 
 
 function exportChat() {
     const messagesBox = document.getElementById('messagesBox');
