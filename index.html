@@ -605,9 +605,9 @@
             reader.readAsText(file);
             event.target.value = ''; 
         }
-        // --- АВТОНАРЕЗКА ЧАТА НА СКРИНШОТЫ В ZIP ---
+        // --- АВТОНАРЕЗКА ЧАТА НА СКРИНШОТЫ В ZIP (УМНАЯ ВЕРСИЯ) ---
         async function downloadChatAsZip() {
-            const msgs = Array.from(messagesBox.children);
+            const msgs = Array.from(messagesBox.children).filter(m => m.style.display !== 'none');
             if (msgs.length === 0) return alert('Чат пуст! Нечего нарезать.');
 
             const zipBtn = document.getElementById('zipBtn');
@@ -617,13 +617,9 @@
             zipBtn.disabled = true;
 
             const zip = new JSZip();
-            const maxAvailableHeight = 640; // Максимальная высота сообщений на одном экране
+            // maxAvailableHeight - видимая область чата между шапкой и полем ввода
+            const maxAvailableHeight = 640; 
             
-            let currentBatch = [];
-            let currentHeight = 0;
-            let slideIndex = 1;
-
-            // Запоминаем скролл и прячем контекстное меню
             const originalScrollTop = messagesBox.scrollTop;
             contextMenu.style.display = 'none';
 
@@ -631,77 +627,82 @@
             const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
             if (wasHidden) document.body.classList.add('show-preview');
 
-            // Прячем все сообщения
-            msgs.forEach(m => m.style.display = 'none');
+            // 1. ВЫЧИСЛЯЕМ УМНЫЕ ТОЧКИ СКРОЛЛА (СЛАЙДЫ)
+            let slidesScrollTops = [0];
+            let currentScroll = 0;
+            let lastScroll = -1;
 
-            for (let i = 0; i < msgs.length; i++) {
-                const msg = msgs[i];
-                msg.style.display = ''; // Временно показываем, чтобы измерить
-                
-                // Считаем высоту сообщения вместе с нижним отступом
-                const style = window.getComputedStyle(msg);
-                const msgHeight = msg.offsetHeight + parseInt(style.marginBottom || 0);
-                
-                // Если добавление этого сообщения переполняет экран
-                if (currentHeight + msgHeight > maxAvailableHeight && currentBatch.length > 0) {
-                    msg.style.display = 'none'; // Прячем обратно, оно пойдет на следующий скрин
-                    
-                    // Делаем фотку текущего экрана
-                    await captureSlide(zip, slideIndex);
-                    
-                    // Сбрасываем счетчики для следующего скрина
-                    currentBatch.forEach(m => m.style.display = 'none');
-                    currentBatch = [];
-                    currentHeight = 0;
-                    slideIndex++;
+            while (currentScroll + maxAvailableHeight < messagesBox.scrollHeight && currentScroll !== lastScroll) {
+                lastScroll = currentScroll;
+                let viewportBottom = currentScroll + maxAvailableHeight;
+                let nextAnchorTop = currentScroll + maxAvailableHeight; 
+
+                // Ищем сообщение, которое обрезалось снизу
+                for (let i = 0; i < msgs.length; i++) {
+                    let msg = msgs[i];
+                    let msgTop = msg.offsetTop; 
+                    let msgBottom = msgTop + msg.offsetHeight;
+
+                    // Если баббл начался в видимой зоне, а закончился за ее пределами (обрезался)
+                    if (msgTop > currentScroll && msgTop < viewportBottom && msgBottom > viewportBottom) {
+                        // Следующий скрин начнем ровно с этого баббла (минус 10px для визуала)
+                        nextAnchorTop = msgTop - 10; 
+                        break;
+                    }
+                    // Если баббл целиком не влез (предыдущий влез идеально до пикселя)
+                    else if (msgTop >= viewportBottom) {
+                        nextAnchorTop = msgTop - 10;
+                        break;
+                    }
                 }
+
+                // Защита от зависаний (если сообщение длиннее целого экрана)
+                if (nextAnchorTop <= currentScroll) nextAnchorTop = currentScroll + maxAvailableHeight; 
                 
-                // Добавляем сообщение в текущий кадр
-                msg.style.display = '';
-                currentBatch.push(msg);
-                currentHeight += msgHeight;
+                currentScroll = nextAnchorTop;
+                
+                // Добавляем точку для следующего скрина
+                if (currentScroll < messagesBox.scrollHeight) {
+                    slidesScrollTops.push(currentScroll);
+                }
             }
 
-            // Фоткаем последний кусок (остатки), если они есть
-            if (currentBatch.length > 0) {
+            const totalSlides = slidesScrollTops.length;
+
+            // 2. ДЕЛАЕМ СКРИНЫ ПО НАШИМ УМНЫМ ТОЧКАМ
+            for (let i = 0; i < slidesScrollTops.length; i++) {
+                let slideIndex = i + 1;
+                zipBtn.innerHTML = `⏳ Слайд ${slideIndex}/${totalSlides}...`;
+
+                // Прокручиваем к нужной позиции
+                messagesBox.scrollTo(0, slidesScrollTops[i]);
+                
+                // ВАЖНО: Принудительно заставляем скрипт пересчитать градиент для нового положения!
+                updateVisuals(); 
+                
+                // Ждем 100мс, чтобы браузер 100% успел отрисовать новый градиент
+                await new Promise(resolve => setTimeout(resolve, 100));
+
                 await captureSlide(zip, slideIndex);
             }
 
-            // Возвращаем всё как было
-            msgs.forEach(m => m.style.display = '');
-            messagesBox.scrollTop = originalScrollTop;
+            // Возвращаем всё как было до начала нарезки
+            messagesBox.scrollTo(0, originalScrollTop);
+            updateVisuals(); 
             if (wasHidden) document.body.classList.remove('show-preview');
 
             zipBtn.innerHTML = '📦 Упаковка...';
 
-            // Генерируем архив и скачиваем
             zip.generateAsync({type:"blob"}).then(function(content) {
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(content);
-                link.download = "instagram_storyboard.zip";
+                link.download = "instagram_storyboard_pro.zip";
                 link.click();
                 
                 zipBtn.innerHTML = originalBtnText;
                 zipBtn.style.opacity = '1';
                 zipBtn.disabled = false;
             });
-        }
-
-        // Вспомогательная функция для скриншотера
-        async function captureSlide(zip, index) {
-            phoneWrapper.style.borderRadius = '0'; 
-            phoneWrapper.style.border = 'none'; 
-            phoneWrapper.style.boxShadow = 'none';
-
-            const canvas = await html2canvas(phoneWrapper, { scale: 3, useCORS: true, backgroundColor: '#0d1015', logging: false });
-            
-            phoneWrapper.style.borderRadius = '40px'; 
-            phoneWrapper.style.border = '1px solid #222'; 
-            phoneWrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.6)';
-
-            const dataUrl = canvas.toDataURL('image/png');
-            const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
-            zip.file(`slide_${index}.png`, base64Data, {base64: true});
         }
     </script>
 </body>
