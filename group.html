@@ -4,250 +4,125 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram Group Chat Generator - Pro Mode Final</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <style>
-        @font-face {
-            font-family: 'SF Pro Display';
-            src: local('-apple-system'), local('BlinkMacSystemFont');
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background: #121212; display: flex; justify-content: center; gap: 20px; padding: 20px; height: 100vh; color: #fff;
-        }
-
-        .controls { 
-            background: #1e1e1e; border-radius: 16px; padding: 20px; width: 360px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-            display: flex; flex-direction: column; gap: 12px; height: fit-content; max-height: 95vh; overflow-y: auto; border: 1px solid #333;
-        }
-        .controls h3 { font-size: 18px; margin-bottom: 5px; text-align: center; color: #0095f6; }
-        
-        .control-section { background: #2a2a2a; border-radius: 8px; border: 1px solid #444; overflow: hidden; margin-bottom: 5px; }
-        .control-section summary { padding: 12px; font-weight: 600; font-size: 14px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background: #333; }
-        .section-content { padding: 12px; font-size: 13px; display: flex; flex-direction: column; gap: 10px; }
-
-        input, select, textarea { padding: 10px; border: 1px solid #444; background: #1e1e1e; color: #fff; border-radius: 8px; font-size: 14px; outline: none; width: 100%; }
-        button { background: #0095f6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        
-        .reply-indicator { display: none; background: #262626; padding: 10px; border-radius: 8px; font-size: 12px; border-left: 3px solid #0095f6; color: #a8a8a8; margin-bottom: 5px; }
-        .reply-indicator-text { color: #fff; font-style: italic; display: block; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .cancel-btn { background: none !important; color: #ff4d4d !important; padding: 0 !important; float: right; width: auto !important; font-weight: bold;}
-
-        .phone-wrapper { width: 390px; height: 844px; background: #0d1015; border-radius: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); overflow: hidden; display: flex; flex-direction: column; border: 1px solid #222; position: relative; }
-        .chat-container { flex: 1; display: flex; flex-direction: column; background: transparent; min-height: 0; }
-        .top-bar-container { width: 100%; position: relative; background: #0d1015; flex-shrink: 0; }
-        .top-bar-container img { width: 100%; display: block; }
-
-        .dynamic-header { position: absolute; top: 57px; left: 45px; display: flex; align-items: center; gap: 10px; z-index: 10; }
-        .group-avatars-container { position: relative; width: 42px; height: 42px; flex-shrink: 0; }
-        .group-avatars-container img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid #0d1015; position: absolute; }
-        .group-avatars-container .av-top { top: 0; left: 0; z-index: 2; }
-        .group-avatars-container .av-bottom { bottom: 0; right: 0; z-index: 1; }
-
-        .header-info { display: flex; flex-direction: column; }
-        .header-info .name { font-weight: 600; font-size: 15px; color: #fff; display: flex; align-items: center; gap: 4px; }
-        #iosTimeDisplay { position: absolute; top: 14px; left: 32px; font-weight: 600; font-size: 16px; letter-spacing: -0.3px; color: #fff; z-index: 20; }
-
-        .messages { flex: 1; padding: 16px; display: flex; flex-direction: column; overflow-y: auto; background: #0d1015; min-height: 0; position: relative; }
-        .messages::-webkit-scrollbar { width: 0px; background: transparent; }
-        
-        .message-row { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; cursor: pointer; position: relative; z-index: 2; margin-bottom: 10px; }
-        .message-row.left { align-self: flex-start; }
-        .message-row.right { align-self: flex-end; }
-        
-        .msg-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-        .msg-content { display: flex; flex-direction: column; max-width: 100%; min-width: 0; }
-        .message-row.left .msg-content { align-items: flex-start; }
-        .message-row.right .msg-content { align-items: flex-end; }
-
-        .reply-header { font-size: 11px; color: #8e8e8e; margin-bottom: 4px; padding: 0 4px; }
-        .message-row.left .reply-header { margin-left: 9px; } 
-        .reply-wrapper { display: flex; gap: 6px; margin-bottom: 6px; max-width: 100%; }
-        .reply-line { width: 3px; background-color: #23282F; border-radius: 3px; flex-shrink: 0; }
-        .reply-bubble { background: #23282F; padding: 10px 12px; border-radius: 18px; flex: 1; min-width: 0; }
-        /* Починили троеточие и тут */
-        .reply-bubble-text { font-size: 13px; color: #e0e0e0; line-height: 1.2; overflow: hidden; white-space: normal; word-break: break-word; }
-
-        .msg { padding: 9px 13px; border-radius: 20px; font-size: 15px; line-height: 1.35; overflow-wrap: break-word; word-break: break-word; width: fit-content; max-width: 100%; display: inline-block; }
-        .message-row.left .msg { background: #25282d !important; color: #fff; }
-        .message-row.right .msg { color: white; }
-        .time-divider { text-align: center; color: #8e8e8e; font-size: 11px; font-weight: 500; margin: 24px 0 16px 0; width: 100%; text-transform: uppercase; letter-spacing: 0.2px; align-self: center; cursor: pointer; }
-
-        .msg-image-attachment { max-width: 170px; border-radius: 20px; display: block; border: 1px solid #222; object-fit: cover; }
-        .bottom-bar-container { width: 100%; background: #0d1015; flex-shrink: 0; }
-        .bottom-bar-container img { width: 100%; display: block; }
-
-        .context-menu { position: absolute; background: #262626; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 100; overflow: hidden; border: 1px solid #363636; width: 160px; display: none; }
-        .menu-item { padding: 12px 16px; font-size: 15px; color: #fff; cursor: pointer; border-bottom: 1px solid #363636; }
-        .menu-item-danger { color: #ed4956; border-bottom: none; }
-        
-        /* СТИЛИ ДЛЯ БОКОВОГО МЕНЮ */
-        .sidebar { 
-            background: #1e1e1e; 
-            border-radius: 16px; 
-            padding: 20px; 
-            width: 220px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-            border: 1px solid #333;
-            height: fit-content;
-        }
-        .sidebar-title {
-            font-size: 14px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .nav-item {
-            padding: 12px 16px;
-            border-radius: 8px;
-            color: #e0e0e0;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid transparent;
-        }
-        .nav-item:hover { 
-            background: #2a2a2a; 
-            border-color: #444;
-        }
-        .nav-item.active { 
-            background: #0095f6; 
-            color: #fff; 
-            border-color: #0095f6;
-            box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3);
-        }
-        @media (max-width: 950px) {
-            body {
-                flex-direction: column;
-                align-items: center;
-                height: auto;
-                min-height: 100vh;
-                padding: 15px;
-            }
-            .sidebar {
-                width: 100%;
-                max-width: 400px;
-                flex-direction: row;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-            .sidebar-title { display: none; } 
-            .nav-item { flex: 1; justify-content: center; text-align: center; }
-            .controls {
-                width: 100%;
-                max-width: 400px;
-                max-height: none; 
-            }
-            .phone-wrapper {
-                width: 100%;
-                max-width: 400px;
-                height: 85vh; 
-                min-height: 650px;
-            }
-        }
-    </style>
 </head>
 <body>
-<div class="sidebar">
+    <div class="sidebar">
         <div class="sidebar-title">Выбор режима</div>
         <a href="index.html" class="nav-item">👤 Личный (1 на 1)</a>
         <a href="group.html" class="nav-item active">👥 Групповой чат</a>
     </div>
-    <div class="controls">
-        <h3>Групповой чат (Final)</h3>
 
-        <details class="control-section" open>
-            <summary>👥 Настройки группы</summary>
-            <div class="section-content">
-                <input type="text" id="groupName" placeholder="Название группы" value="ginevra.w_p, ᛟ" oninput="updateHeader()">
-                <div style="display: flex; gap: 5px;">
-                    <input type="text" id="avTop" placeholder="Ава сверху" value="https://i.pravatar.cc/150?img=35" oninput="updateHeader()">
-                    <input type="text" id="avBottom" placeholder="Ава снизу" value="https://i.pravatar.cc/150?img=68" oninput="updateHeader()">
-                </div>
-                <input type="text" id="timeHeader" value="14:38" oninput="updateTimeHeader()">
-            </div>
-        </details>
-
-        <details class="control-section">
-            <summary>📎 Медиа</summary>
-            <div class="section-content">
-                <strong>Ответ на историю:</strong>
-                <input type="file" onchange="previewMedia(this, 'story')">
-                <strong>Картинка в чат:</strong>
-                <input type="file" onchange="previewMedia(this, 'chatImg')">
-            </div>
-        </details>
-
-        <hr style="border: 0; border-top: 1px solid #444;">
-
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="timeDividerInput" placeholder="ВЧЕРА В 17:17" style="flex: 2;">
-            <button onclick="addTimeDivider()" style="flex: 1; background: #333; font-size: 12px;">⏳ Плашка</button>
-        </div>
-
-        <div id="replyIndicator" class="reply-indicator">
-            <button class="cancel-btn" onclick="cancelReply()">✕</button>
-            Отвечаем на: <span id="replyPreview" class="reply-indicator-text"></span>
-        </div>
-
-        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
-            <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
-                <input type="checkbox" id="isForwardedCheckbox" style="width: auto; margin: 0; cursor: pointer;"> Пересланное
-            </label>
-            <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
-                <input type="checkbox" id="isSeenCheckbox" style="width: auto; margin: 0; cursor: pointer;" onchange="document.getElementById('seenTextInput').style.display = this.checked ? 'block' : 'none'"> Просмотрено
-            </label>
-            <input type="text" id="seenTextInput" placeholder="Напр: 5 ч. назад" style="display: none; flex: 1; padding: 4px 8px; font-size: 12px; height: 26px;">
-        </div>
-
-        <textarea id="messageInput" placeholder="Текст сообщения..." rows="3" style="font-family: inherit; resize: none;"></textarea>
-        
-        <select id="senderSelect"></select>
-        
-        <button id="mainActionBtn" onclick="addMessage()" style="margin-top: 5px;">Отправить</button>
-        
-        <div style="display: flex; gap: 10px; margin-top: 5px;">
-            <button onclick="clearChat()" style="background: #333; flex: 1; font-size: 13px;">Очистить</button>
-            <button onclick="downloadChat()" style="background: #fff; color: #000; flex: 2; font-size: 13px;">📸 Скачать</button>
-        </div>
-        <button onclick="updateSenderList()" style="background: #222; font-size: 11px; margin-top: 5px;">🔄 Обновить список участников</button>
+    <div class="mobile-tabs">
+        <button id="tabControls" class="active" onclick="toggleMobileTab('controls')">⚙️ Настройки</button>
+        <button id="tabPreview" onclick="toggleMobileTab('preview')">📱 Превью</button>
     </div>
 
-    <div class="phone-wrapper" id="captureArea">
-        <div id="contextMenu" class="context-menu">
-            <div class="menu-item" onclick="handleReply()">Ответить</div>
-            <div class="menu-item" onclick="handleEdit()">Изменить</div>
-            <div class="menu-item menu-item-danger" onclick="handleDelete()">Удалить</div>
-        </div>
+    <div class="controls-container">
+        <div class="controls">
+            <h3 class="group-title">Групповой чат (Final)</h3>
 
-        <div class="chat-container">
-            <div class="top-bar-container">
-                <img src="https://i.postimg.cc/CLHkRs4K/верхний_бар.png" crossorigin="anonymous">
-                <div id="iosTimeDisplay">14:38</div>
-                <div class="dynamic-header">
-                    <div class="group-avatars-container">
-                        <img id="headerAvTop" class="av-top" src="">
-                        <img id="headerAvBottom" class="av-bottom" src="">
+            <details class="control-section" open>
+                <summary>👥 Настройки группы</summary>
+                <div class="section-content">
+                    <input type="text" id="groupName" placeholder="Название группы" value="ginevra.w_p, ᛟ" oninput="updateHeader()">
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="avTop" placeholder="Ава сверху" value="https://i.pravatar.cc/150?img=35" oninput="updateHeader()">
+                        <input type="text" id="avBottom" placeholder="Ава снизу" value="https://i.pravatar.cc/150?img=68" oninput="updateHeader()">
                     </div>
-                    <div class="header-info"><div class="name"><span id="headerGroupName"></span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A8A8A8" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div></div>
+                    <input type="text" id="timeHeader" value="14:38" oninput="updateTimeHeader()">
                 </div>
+            </details>
+
+            <details class="control-section">
+                <summary>📎 Медиа</summary>
+                <div class="section-content">
+                    <strong>Ответ на историю:</strong>
+                    <input type="file" onchange="previewMedia(this, 'story')">
+                    <strong>Картинка в чат:</strong>
+                    <input type="file" onchange="previewMedia(this, 'chatImg')">
+                </div>
+            </details>
+
+            <hr style="border: 0; border-top: 1px solid #444;">
+
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="timeDividerInput" placeholder="ВЧЕРА В 17:17" style="flex: 2;">
+                <button onclick="addTimeDivider()" style="flex: 1; background: #333; font-size: 12px;">⏳ Плашка</button>
             </div>
-            <div class="messages" id="messagesBox"></div>
-            <div class="bottom-bar-container"><img src="https://i.postimg.cc/SK5zBTm1/нижний_бар.png" crossorigin="anonymous"></div>
+
+            <div id="replyIndicator" class="reply-indicator">
+                <button class="cancel-btn" onclick="cancelReply()">✕</button>
+                Отвечаем на: <span id="replyPreview" class="reply-indicator-text"></span>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+                <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
+                    <input type="checkbox" id="isForwardedCheckbox" style="width: auto; margin: 0; cursor: pointer;"> Пересланное
+                </label>
+                <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
+                    <input type="checkbox" id="isSeenCheckbox" style="width: auto; margin: 0; cursor: pointer;" onchange="document.getElementById('seenTextInput').style.display = this.checked ? 'block' : 'none'"> Просмотрено
+                </label>
+                <input type="text" id="seenTextInput" placeholder="Напр: 5 ч. назад" style="display: none; flex: 1; padding: 4px 8px; font-size: 12px; height: 26px;">
+            </div>
+
+            <textarea id="messageInput" placeholder="Текст сообщения..." rows="3" style="font-family: inherit; resize: none;"></textarea>
+            
+            <select id="senderSelect"></select>
+            
+            <button id="mainActionBtn" onclick="addMessage()" style="margin-top: 5px;">Отправить</button>
+            
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <button onclick="clearChat()" style="background: #333; flex: 1; font-size: 13px;">Очистить</button>
+                <button onclick="downloadChat()" style="background: #fff; color: #000; flex: 2; font-size: 13px;">📸 Скачать</button>
+            </div>
+            <button onclick="updateSenderList()" style="background: #222; font-size: 11px; margin-top: 5px;">🔄 Обновить список участников</button>
+        </div>
+    </div>
+
+    <div class="phone-container">
+        <div class="phone-wrapper" id="captureArea">
+            <div id="contextMenu" class="context-menu">
+                <div class="menu-item" onclick="handleReply()">Ответить</div>
+                <div class="menu-item" onclick="handleEdit()">Изменить</div>
+                <div class="menu-item menu-item-danger" onclick="handleDelete()">Удалить</div>
+            </div>
+
+            <div class="chat-container">
+                <div class="top-bar-container">
+                    <img src="https://i.postimg.cc/CLHkRs4K/верхний_бар.png" crossorigin="anonymous">
+                    <div id="iosTimeDisplay">14:38</div>
+                    <div class="dynamic-header">
+                        <div class="group-avatars-container">
+                            <img id="headerAvTop" class="av-top" src="">
+                            <img id="headerAvBottom" class="av-bottom" src="">
+                        </div>
+                        <div class="header-info"><div class="name"><span id="headerGroupName"></span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A8A8A8" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div></div>
+                    </div>
+                </div>
+                <div class="messages" id="messagesBox"></div>
+                <div class="bottom-bar-container"><img src="https://i.postimg.cc/SK5zBTm1/нижний_бар.png" crossorigin="anonymous"></div>
+            </div>
         </div>
     </div>
 
     <script>
+        // ЛОГИКА МОБИЛЬНЫХ ВКЛАДОК
+        function toggleMobileTab(tab) {
+            const body = document.body;
+            if (tab === 'preview') {
+                body.classList.add('show-preview');
+                document.getElementById('tabPreview').classList.add('active');
+                document.getElementById('tabControls').classList.remove('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                body.classList.remove('show-preview');
+                document.getElementById('tabControls').classList.add('active');
+                document.getElementById('tabPreview').classList.remove('active');
+            }
+        }
+
         const messagesBox = document.getElementById('messagesBox');
         const messageInput = document.getElementById('messageInput');
         const contextMenu = document.getElementById('contextMenu');
@@ -324,13 +199,11 @@
             let html = !isRight ? `<img class="msg-avatar" src="${avatarUrl}">` : '';
             html += `<div class="msg-content">`;
             
-            // 1. Плашка пересланного сообщения
             if (isForwarded) {
                 const headerText = isRight ? 'Вы переслали сообщение' : 'Переслал(-а) сообщение';
                 html += `<div class="reply-header">${headerText}</div>`;
             }
 
-            // 2. Ответ на историю или сообщение
             if (storyData) {
                 html += `<div class="reply-header">${isRight?'Вы ответили на историю':'Ответил(-а) на историю'}</div>`;
                 html += `<div class="reply-wrapper"><div class="reply-line"></div><img src="${storyData}" class="story-thumbnail"></div>`;
@@ -339,13 +212,10 @@
                 html += `<div class="reply-wrapper"><div class="reply-line"></div><div class="reply-bubble"><div class="reply-bubble-text">${replyingToText}</div></div></div>`;
             }
             
-            // 3. Картинка в чат
             if (chatImgData) html += `<img src="${chatImgData}" class="msg-image-attachment">`;
             
-            // 4. Текст сообщения
             if (text) html += `<div class="msg">${text}</div>`;
             
-            // 5. Статус Просмотрено
             if (isRight && isSeen) {
                 const customTime = seenTextInput.value.trim();
                 const seenStr = customTime ? (customTime.toLowerCase().startsWith('просмотр') ? customTime : `Просмотрено ${customTime}`) : 'Просмотрено';
@@ -401,11 +271,12 @@
                 fullText = msgNode.innerHTML.replace(/<br\s*[\/]?>/gi, ' '); 
             }
 
-            // Магия троеточия (если текст больше 75 символов)
             replyingToText = (fullText.length > 75) ? fullText.substring(0, 72).trim() + '...' : fullText;
             
             document.getElementById('replyPreview').textContent = replyingToText;
             document.getElementById('replyIndicator').style.display = 'block';
+
+            if (window.innerWidth <= 950) { toggleMobileTab('controls'); }
         }
 
         function handleEdit() {
@@ -418,6 +289,8 @@
             messageInput.value = currentText; 
             mainActionBtn.textContent = '💾 Сохранить изменения'; 
             mainActionBtn.style.background = '#4CAF50';
+
+            if (window.innerWidth <= 950) { toggleMobileTab('controls'); }
         }
 
         function cancelReply() { replyingToText = null; document.getElementById('replyIndicator').style.display = 'none'; }
@@ -464,7 +337,6 @@
                         if (row.previousElementSibling?.getAttribute('data-sender') === sender && !hasReply) msg.style.borderTopRightRadius = '4px';
                         if (isNextSameAuthor) msg.style.borderBottomRightRadius = '4px';
                         
-                        // ФИКС ГРАДИЕНТА
                         msg.style.backgroundImage = "url('https://i.postimg.cc/T1nmqVM4/фон-градиент.png')";
                         msg.style.backgroundSize = `100% ${phoneRect.height}px`;
                         msg.style.backgroundRepeat = 'no-repeat';
@@ -484,12 +356,18 @@
 
         function downloadChat() {
             contextMenu.style.display = 'none';
-            html2canvas(document.getElementById('captureArea'), { scale: 3, useCORS: true, backgroundColor: '#0d1015' }).then(canvas => {
-                const link = document.createElement('a'); link.download = 'ig_group_chat.png'; link.href = canvas.toDataURL(); link.click();
-            });
+
+            const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
+            if (wasHidden) { document.body.classList.add('show-preview'); }
+
+            setTimeout(() => {
+                html2canvas(document.getElementById('captureArea'), { scale: 3, useCORS: true, backgroundColor: '#0d1015' }).then(canvas => {
+                    if (wasHidden) { document.body.classList.remove('show-preview'); }
+                    const link = document.createElement('a'); link.download = 'ig_group_chat.png'; link.href = canvas.toDataURL(); link.click();
+                });
+            }, 100);
         }
 
-        // ОБРАБОТЧИК СКРОЛЛА - ВАЖНО ДЛЯ ГРАДИЕНТА
         messagesBox.addEventListener('scroll', updateVisuals);
 
         updateHeader(); updateTimeHeader(); updateSenderList();
