@@ -3,323 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram DM Generator - Ultimate GUI</title>
+    <title>Instagram DM Generator</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <style>
-        @font-face {
-            font-family: 'SF Pro Display';
-            src: local('-apple-system'), local('BlinkMacSystemFont');
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background: #121212; display: flex; justify-content: center; gap: 20px; padding: 20px; height: 100vh; color: #fff;
-        }
-
-        .controls { 
-            background: #1e1e1e; border-radius: 16px; padding: 20px; width: 360px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-            display: flex; flex-direction: column; gap: 12px; height: fit-content; max-height: 95vh; overflow-y: auto; border: 1px solid #333;
-        }
-        .controls h3 { font-size: 18px; margin-bottom: 5px; text-align: center; }
-        
-        .control-section { background: #2a2a2a; border-radius: 8px; border: 1px solid #444; overflow: hidden; }
-        .control-section summary { 
-            padding: 12px; font-weight: 600; font-size: 14px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background: #333; transition: background 0.2s;
-        }
-        .control-section summary:hover { background: #3a3a3a; }
-        .control-section summary::-webkit-details-marker { display: none; }
-        .control-section summary::after { content: '▼'; font-size: 10px; transition: transform 0.3s ease; }
-        .control-section[open] summary::after { transform: rotate(180deg); }
-        .control-section[open] summary { border-bottom: 1px solid #444; }
-        
-        .section-content { padding: 12px; font-size: 13px; display: flex; flex-direction: column; gap: 10px; }
-        .controls input[type="text"], .controls input[type="number"], .controls select, .controls textarea { 
-            padding: 10px; border: 1px solid #444; background: #1e1e1e; color: #fff; border-radius: 8px; font-size: 14px; outline: none; width: 100%;
-        }
-        .controls button { background: #0095f6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .controls button:hover { opacity: 0.8; }
-        
-        .reply-indicator { display: none; background: #262626; padding: 10px; border-radius: 8px; font-size: 12px; border-left: 3px solid #0095f6; color: #a8a8a8; }
-        .reply-indicator-text { color: #fff; font-style: italic; display: block; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .cancel-btn { background: none !important; color: #ff4d4d !important; padding: 0 !important; float: right; width: auto !important; font-weight: bold;}
-
-        .phone-wrapper { width: 390px; height: 844px; background: #0d1015; border-radius: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); overflow: hidden; display: flex; flex-direction: column; border: 1px solid #222; position: relative; }
-        .chat-container { flex: 1; display: flex; flex-direction: column; background: transparent; min-height: 0; }
-        .top-bar-container { width: 100%; position: relative; background: #0d1015; flex-shrink: 0; display: flex; justify-content: center; align-items: center; }
-        .top-bar-container img { width: 100%; display: block; }
-        .dynamic-header { position: absolute; top: 57px; left: 45px; display: flex; align-items: center; gap: 10px; z-index: 10; }
-        .dynamic-header img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid #222; }
-        .header-info { display: flex; flex-direction: column; }
-        .header-info .name { font-weight: 600; font-size: 15px; color: #fff; display: flex; align-items: center; gap: 4px; }
-        .header-info .subtitle { font-size: 12px; color: #8e8e8e; }
-        #iosTimeDisplay { position: absolute; top: 14px; left: 32px; font-weight: 600; font-size: 16px; letter-spacing: -0.3px; color: #fff; z-index: 20; }
-
-        .messages { flex: 1; padding: 16px; display: flex; flex-direction: column; overflow-y: auto; background: #0d1015; min-height: 0; position: relative; }
-        .messages::-webkit-scrollbar { width: 0px; background: transparent; }
-        
-        .message-row { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; cursor: pointer; transition: opacity 0.2s; position: relative; z-index: 2; }
-        .message-row:hover { opacity: 0.8; }
-        .message-row.left { align-self: flex-start; }
-        .message-row.right { align-self: flex-end; }
-        
-        /* ПЛАШКА ВРЕМЕНИ */
-        .time-divider {
-            text-align: center;
-            color: #8e8e8e;
-            font-size: 11px;
-            font-weight: 500;
-            margin: 24px 0 16px 0;
-            width: 100%;
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-            align-self: center;
-        }
-
-        .msg-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; visibility: hidden; flex-shrink: 0; }
-        .msg-content { display: flex; flex-direction: column; max-width: 100%; min-width: 0; }
-        .message-row.left .msg-content { align-items: flex-start; }
-        .message-row.right .msg-content { align-items: flex-end; }
-
-        .reply-header { font-size: 11px; color: #8e8e8e; margin-bottom: 4px; padding: 0 4px; }
-        .reply-wrapper { display: flex; gap: 6px; margin-bottom: 6px; max-width: 100%; }
-        .reply-line { width: 3px; background-color: #23282F; border-radius: 3px; flex-shrink: 0; }
-        .reply-bubble { background: #23282F; padding: 10px 14px; border-radius: 18px; flex: 1; min-width: 0; }
-        .reply-bubble-text { font-size: 13px; color: #e0e0e0; line-height: 1.2; max-height: 2.4em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; text-overflow: ellipsis; }
-        .story-thumbnail { height: 200px; width: auto; max-width: 120px; object-fit: cover; border-radius: 12px; border: 1px solid #222; }
-
-       .msg { padding: 9px 13px; border-radius: 20px; font-size: 15px; line-height: 1.35; overflow-wrap: break-word; word-break: break-word; width: fit-content; max-width: 100%; background-repeat: no-repeat; display: inline-block; }
-        .message-row.left .msg { background: #25282d !important; color: #fff; }
-        .message-row.right .msg { color: white; }
-        .msg-image-attachment { max-width: 170px; border-radius: 20px !important; padding: 0; display: block; border: 1px solid #222; object-fit: cover; background: transparent !important; }
-
-        .bottom-bar-container { width: 100%; background: #0d1015; flex-shrink: 0; display: flex; justify-content: center; align-items: center; }
-        .bottom-bar-container img { width: 100%; display: block; }
-        .context-menu { position: absolute; background: #262626; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 100; overflow: hidden; border: 1px solid #363636; width: 160px; display: none; }
-        .menu-item { padding: 12px 16px; font-size: 15px; color: #fff; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #363636; }
-        .menu-item:last-child { border-bottom: none; }
-        .menu-item:hover { background: #333; }
-        .menu-item-danger { color: #ed4956; }
-
-        /* СТИЛИ ДЛЯ БОКОВОГО МЕНЮ */
-        .sidebar { 
-            background: #1e1e1e; 
-            border-radius: 16px; 
-            padding: 20px; 
-            width: 220px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-            border: 1px solid #333;
-            height: fit-content;
-        }
-        .sidebar-title {
-            font-size: 14px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .nav-item {
-            padding: 12px 16px;
-            border-radius: 8px;
-            color: #e0e0e0;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid transparent;
-        }
-        .nav-item:hover { 
-            background: #2a2a2a; 
-            border-color: #444;
-        }
-        .nav-item.active { 
-            background: #0095f6; 
-            color: #fff; 
-            border-color: #0095f6;
-            box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3);
-        }
-        /* АДАПТАЦИЯ ПОД ТЕЛЕФОНЫ И ПЛАНШЕТЫ */
-        @media (max-width: 950px) {
-            body {
-                flex-direction: column;
-                align-items: center;
-                height: auto;
-                min-height: 100vh;
-                padding: 15px;
-            }
-            .sidebar {
-                width: 100%;
-                max-width: 400px;
-                flex-direction: row;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-            .sidebar-title { display: none; } /* Прячем заголовок для экономии места */
-            .nav-item { flex: 1; justify-content: center; text-align: center; }
-            .controls {
-                width: 100%;
-                max-width: 400px;
-                max-height: none; /* Убираем скролл внутри панели на телефоне */
-            }
-            .phone-wrapper {
-                width: 100%;
-                max-width: 400px;
-                height: 85vh; /* Высота под экран телефона */
-                min-height: 650px;
-            }
-        }
-    </style>
 </head>
 <body>
-<div class="sidebar">
+    <div class="sidebar">
         <div class="sidebar-title">Выбор режима</div>
         <a href="index.html" class="nav-item active">👤 Личный (1 на 1)</a>
         <a href="group.html" class="nav-item">👥 Групповой чат</a>
     </div>
-    <div class="controls">
-        <h3>Настройки скрина</h3>
 
-        <details class="control-section">
-            <summary>📚 Библиотека персонажей</summary>
-            <div class="section-content">
-                <select id="characterSelect" style="font-weight: bold;" onchange="loadCharacter()">
-                    <option value="">-- Новый персонаж --</option>
-                </select>
-                
-                <div style="display: flex; gap: 5px;">
-                    <button onclick="saveCharacter()" style="flex: 1; background: #4CAF50; font-size: 12px; padding: 6px;">💾 Сохранить</button>
-                    <button onclick="deleteCharacter()" style="flex: 1; background: #ed4956; font-size: 12px; padding: 6px;">🗑️ Удалить</button>
-                </div>
+    <div class="mobile-tabs">
+        <button id="tabControls" class="active" onclick="toggleMobileTab('controls')">⚙️ Настройки</button>
+        <button id="tabPreview" onclick="toggleMobileTab('preview')">📱 Превью</button>
+    </div>
 
-                <div style="display: flex; gap: 5px; margin-top: 5px;">
-                    <button onclick="exportLibrary()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📥 Скачать базу</button>
-                    <input type="file" id="importLib" accept=".json" style="display: none;" onchange="importLibrary(event)">
-                    <button onclick="document.getElementById('importLib').click()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📤 Загрузить</button>
-                </div>
+    <div class="controls-container">
+        <div class="controls">
+            <h3>Настройки скрина</h3>
 
-            </div>
-        </details>
-        
-        <details class="control-section" open>
-            <summary>👤 Профиль и Время</summary>
-            <div class="section-content">
-                <div>
-                    <span style="font-size: 12px; color: #aaa; margin-bottom: 4px; display: block;">Ссылка на аватарку (URL) или файл:</span>
-                    <input type="text" id="leftAvatar" placeholder="URL картинки" value="https://i.postimg.cc/Vvbh1Vy7/i.webp" style="margin-bottom: 5px;">
-                    <input type="file" id="avatarUpload" accept="image/*" style="font-size: 12px; background: transparent; padding: 0; border: none;">
-                </div>
-                
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="timeInput" value="14:38" placeholder="Время" style="flex: 1;">
-                    <input type="text" id="leftName" placeholder="Имя" value="Введите имя..." style="flex: 2;">
-                </div>
-                <input type="text" id="leftSubtitle" placeholder="Подпись (В сети...)" value="">
-                
-                <button onclick="document.getElementById('advancedCoords').style.display='flex'; this.style.display='none';" style="background: none; color: #888; font-size: 11px; text-decoration: underline; padding: 0; text-align: left; width: fit-content;">Тонкая настройка координат</button>
-                <div style="display: flex; gap: 10px; display: none;" id="advancedCoords">
-                    <input type="number" id="timePosY" value="14" title="Позиция времени Y" oninput="updateTimePos()">
-                    <input type="number" id="timePosX" value="32" title="Позиция времени X" oninput="updateTimePos()">
-                    <input type="number" id="headerPosY" value="57" title="Позиция шапки Y" oninput="updateHeaderPos()">
-                    <input type="number" id="headerPosX" value="45" title="Позиция шапки X" oninput="updateHeaderPos()">
-                </div>
-            </div>
-        </details>
-
-        <details class="control-section">
-            <summary>📎 Прикрепить медиа</summary>
-            <div class="section-content">
-                <div id="storyUploadBlock" style="padding-bottom: 10px; border-bottom: 1px dashed #444;">
-                    <strong>📱 Ответить на историю:</strong>
-                    <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
-                        <input type="file" id="storyUpload" accept="image/*" style="font-size: 12px; flex: 1; background: transparent; padding: 0; border: none;">
-                        <button id="cancelStoryBtn" onclick="cancelStory()" style="display:none; background: #333; padding: 5px 10px; font-size: 12px;">Удалить</button>
+            <details class="control-section">
+                <summary>📚 Библиотека персонажей</summary>
+                <div class="section-content">
+                    <select id="characterSelect" style="font-weight: bold;" onchange="loadCharacter()">
+                        <option value="">-- Новый персонаж --</option>
+                    </select>
+                    
+                    <div style="display: flex; gap: 5px;">
+                        <button onclick="saveCharacter()" style="flex: 1; background: #4CAF50; font-size: 12px; padding: 6px;">💾 Сохранить</button>
+                        <button onclick="deleteCharacter()" style="flex: 1; background: #ed4956; font-size: 12px; padding: 6px;">🗑️ Удалить</button>
                     </div>
-                    <img id="storyPreview" style="display:none; height: 60px; border-radius: 6px; margin-top: 8px; border: 1px solid #444;">
-                </div>
 
-                <div id="imageUploadBlock">
-                    <strong>🖼️ Отправить картинку в чат:</strong>
-                    <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
-                        <input type="file" id="imageAttachUpload" accept="image/*" style="font-size: 12px; flex: 1; background: transparent; padding: 0; border: none;">
-                        <button id="cancelAttachedImageBtn" onclick="cancelAttachedImage()" style="display:none; background: #333; padding: 5px 10px; font-size: 12px;">Удалить</button>
+                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                        <button onclick="exportLibrary()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📥 Скачать базу</button>
+                        <input type="file" id="importLib" accept=".json" style="display: none;" onchange="importLibrary(event)">
+                        <button onclick="document.getElementById('importLib').click()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📤 Загрузить</button>
                     </div>
-                    <img id="attachedImagePreview" style="display:none; height: 80px; border-radius: 6px; margin-top: 8px; border: 1px solid #444; object-fit: cover;">
                 </div>
+            </details>
+            
+            <details class="control-section" open>
+                <summary>👤 Профиль и Время</summary>
+                <div class="section-content">
+                    <div>
+                        <span style="font-size: 12px; color: #aaa; margin-bottom: 4px; display: block;">Ссылка на аватарку (URL) или файл:</span>
+                        <input type="text" id="leftAvatar" placeholder="URL картинки" value="https://i.postimg.cc/Vvbh1Vy7/i.webp" style="margin-bottom: 5px;">
+                        <input type="file" id="avatarUpload" accept="image/*" style="font-size: 12px; background: transparent; padding: 0; border: none;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="timeInput" value="14:38" placeholder="Время" style="flex: 1;">
+                        <input type="text" id="leftName" placeholder="Имя" value="Введите имя..." style="flex: 2;">
+                    </div>
+                    <input type="text" id="leftSubtitle" placeholder="Подпись (В сети...)" value="">
+                    
+                    <button onclick="document.getElementById('advancedCoords').style.display='flex'; this.style.display='none';" style="background: none; color: #888; font-size: 11px; text-decoration: underline; padding: 0; text-align: left; width: fit-content;">Тонкая настройка координат</button>
+                    <div style="display: flex; gap: 10px; display: none;" id="advancedCoords">
+                        <input type="number" id="timePosY" value="14" title="Позиция времени Y" oninput="updateTimePos()">
+                        <input type="number" id="timePosX" value="32" title="Позиция времени X" oninput="updateTimePos()">
+                        <input type="number" id="headerPosY" value="57" title="Позиция шапки Y" oninput="updateHeaderPos()">
+                        <input type="number" id="headerPosX" value="45" title="Позиция шапки X" oninput="updateHeaderPos()">
+                    </div>
+                </div>
+            </details>
+
+            <details class="control-section">
+                <summary>📎 Прикрепить медиа</summary>
+                <div class="section-content">
+                    <div id="storyUploadBlock" style="padding-bottom: 10px; border-bottom: 1px dashed #444;">
+                        <strong>📱 Ответить на историю:</strong>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                            <input type="file" id="storyUpload" accept="image/*" style="font-size: 12px; flex: 1; background: transparent; padding: 0; border: none;">
+                            <button id="cancelStoryBtn" onclick="cancelStory()" style="display:none; background: #333; padding: 5px 10px; font-size: 12px;">Удалить</button>
+                        </div>
+                        <img id="storyPreview" style="display:none; height: 60px; border-radius: 6px; margin-top: 8px; border: 1px solid #444;">
+                    </div>
+
+                    <div id="imageUploadBlock">
+                        <strong>🖼️ Отправить картинку в чат:</strong>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                            <input type="file" id="imageAttachUpload" accept="image/*" style="font-size: 12px; flex: 1; background: transparent; padding: 0; border: none;">
+                            <button id="cancelAttachedImageBtn" onclick="cancelAttachedImage()" style="display:none; background: #333; padding: 5px 10px; font-size: 12px;">Удалить</button>
+                        </div>
+                        <img id="attachedImagePreview" style="display:none; height: 80px; border-radius: 6px; margin-top: 8px; border: 1px solid #444; object-fit: cover;">
+                    </div>
+                </div>
+            </details>
+
+            <hr style="border: 0; border-top: 1px solid #444; margin: 4px 0;">
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                <input type="text" id="timeDividerInput" placeholder="ВЧЕРА В 17:17" style="flex: 2;">
+                <button onclick="addTimeDivider()" style="flex: 1; background: #333; font-size: 12px;">⏳ Плашка</button>
             </div>
-        </details>
 
-        <hr style="border: 0; border-top: 1px solid #444; margin: 4px 0;">
-        
-        <div style="display: flex; gap: 10px; margin-bottom: 5px;">
-            <input type="text" id="timeDividerInput" placeholder="ВЧЕРА В 17:17" style="flex: 2;">
-            <button onclick="addTimeDivider()" style="flex: 1; background: #333; font-size: 12px;">⏳ Плашка</button>
-        </div>
+            <div id="replyIndicator" class="reply-indicator">
+                <button class="cancel-btn" onclick="cancelReply()">✕</button>
+                Отвечаем на: <span id="replyPreview" class="reply-indicator-text"></span>
+            </div>
 
-        <div id="replyIndicator" class="reply-indicator">
-            <button class="cancel-btn" onclick="cancelReply()">✕</button>
-            Отвечаем на: <span id="replyPreview" class="reply-indicator-text"></span>
-        </div>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+                <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
+                    <input type="checkbox" id="isForwardedCheckbox" style="width: auto; margin: 0; cursor: pointer;"> Пересланное
+                </label>
+                <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
+                    <input type="checkbox" id="isSeenCheckbox" style="width: auto; margin: 0; cursor: pointer;" onchange="document.getElementById('seenTextInput').style.display = this.checked ? 'block' : 'none'"> Просмотрено
+                </label>
+                <input type="text" id="seenTextInput" placeholder="Напр: 5 ч. назад" style="display: none; flex: 1; padding: 4px 8px; font-size: 12px; height: 26px;">
+            </div>
 
-        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
-            <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
-                <input type="checkbox" id="isForwardedCheckbox" style="width: auto; margin: 0; cursor: pointer;"> Пересланное
-            </label>
-            <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
-                <input type="checkbox" id="isSeenCheckbox" style="width: auto; margin: 0; cursor: pointer;" onchange="document.getElementById('seenTextInput').style.display = this.checked ? 'block' : 'none'"> Просмотрено
-            </label>
-            <input type="text" id="seenTextInput" placeholder="Напр: 5 ч. назад" style="display: none; flex: 1; padding: 4px 8px; font-size: 12px; height: 26px;">
-        </div>
-
-        <textarea id="messageInput" placeholder="Текст сообщения..." rows="3" style="font-family: inherit; resize: none;"></textarea>
-        <select id="senderSelect">
-            <option value="right">От тебя (Градиент)</option>
-            <option value="left">От собеседника (Темно-серый)</option>
-        </select>
-        
-        <button id="mainActionBtn" onclick="addMessage()">Добавить сообщение</button>
-        <div style="display: flex; gap: 10px;">
-            <button onclick="clearChat()" style="background: #333; flex: 1; font-size: 13px;">Очистить чат</button>
-            <button onclick="downloadChat()" style="background: #fff; color: #000; flex: 2; font-size: 13px;">📸 Скачать скрин</button>
+            <textarea id="messageInput" placeholder="Текст сообщения..." rows="3" style="font-family: inherit; resize: none;"></textarea>
+            <select id="senderSelect">
+                <option value="right">От тебя (Градиент)</option>
+                <option value="left">От собеседника (Темно-серый)</option>
+            </select>
+            
+            <button id="mainActionBtn" onclick="addMessage()">Добавить сообщение</button>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="clearChat()" style="background: #333; flex: 1; font-size: 13px;">Очистить чат</button>
+                <button onclick="downloadChat()" style="background: #fff; color: #000; flex: 2; font-size: 13px;">📸 Скачать скрин</button>
+            </div>
         </div>
     </div>
 
-    <div class="phone-wrapper" id="captureArea">
-        <div id="contextMenu" class="context-menu">
-            <div class="menu-item" onclick="handleReply()">Ответить</div>
-            <div class="menu-item" onclick="handleEdit()">Изменить</div>
-            <div class="menu-item menu-item-danger" onclick="handleDelete()">Удалить</div>
-        </div>
+    <div class="phone-container">
+        <div class="phone-wrapper" id="captureArea">
+            <div id="contextMenu" class="context-menu">
+                <div class="menu-item" onclick="handleReply()">Ответить</div>
+                <div class="menu-item" onclick="handleEdit()">Изменить</div>
+                <div class="menu-item menu-item-danger" onclick="handleDelete()">Удалить</div>
+            </div>
 
-        <div class="chat-container">
-            <div class="top-bar-container">
-                <img id="topBarImg" src="https://i.postimg.cc/CLHkRs4K/верхний_бар.png" alt="top bar" crossorigin="anonymous">
-                <div id="iosTimeDisplay">14:38</div>
-                <div class="dynamic-header" id="dynamicHeader">
-                    <img id="headerAvatar" src="https://i.postimg.cc/Vvbh1Vy7/i.webp" alt="avatar">
-                    <div class="header-info">
-                        <div class="name">
-                            <span id="headerName">Введите имя...</span>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A8A8A8" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+            <div class="chat-container">
+                <div class="top-bar-container">
+                    <img id="topBarImg" src="https://i.postimg.cc/CLHkRs4K/верхний_бар.png" alt="top bar" crossorigin="anonymous">
+                    <div id="iosTimeDisplay">14:38</div>
+                    <div class="dynamic-header" id="dynamicHeader">
+                        <img id="headerAvatar" class="single-avatar" src="https://i.postimg.cc/Vvbh1Vy7/i.webp" alt="avatar">
+                        <div class="header-info">
+                            <div class="name">
+                                <span id="headerName">Введите имя...</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A8A8A8" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                            </div>
+                            <div class="subtitle" id="headerSubtitle"></div>
                         </div>
-                        <div class="subtitle" id="headerSubtitle"></div>
                     </div>
                 </div>
-            </div>
-            <div class="messages" id="messagesBox"></div>
-            <div class="bottom-bar-container">
-                <img id="bottomBarImg" src="https://i.postimg.cc/SK5zBTm1/нижний_бар.png" alt="bottom bar" crossorigin="anonymous">
+                <div class="messages" id="messagesBox"></div>
+                <div class="bottom-bar-container">
+                    <img id="bottomBarImg" src="https://i.postimg.cc/SK5zBTm1/нижний_бар.png" alt="bottom bar" crossorigin="anonymous">
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // ЛОГИКА МОБИЛЬНЫХ ВКЛАДОК
+        function toggleMobileTab(tab) {
+            const body = document.body;
+            if (tab === 'preview') {
+                body.classList.add('show-preview');
+                document.getElementById('tabPreview').classList.add('active');
+                document.getElementById('tabControls').classList.remove('active');
+                
+                // Прокручиваем к телефону (для удобства)
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                body.classList.remove('show-preview');
+                document.getElementById('tabControls').classList.add('active');
+                document.getElementById('tabPreview').classList.remove('active');
+            }
+        }
+
         const leftNameInput = document.getElementById('leftName');
         const leftSubtitleInput = document.getElementById('leftSubtitle');
         const timeInput = document.getElementById('timeInput');
@@ -460,7 +316,6 @@
         messagesBox.addEventListener('scroll', updateVisuals);
         document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
 
-        // ФУНКЦИЯ ДОБАВЛЕНИЯ ПЛАШКИ ВРЕМЕНИ
         function addTimeDivider() {
             const val = document.getElementById('timeDividerInput').value.trim();
             if (!val) return;
@@ -468,7 +323,6 @@
             div.className = 'time-divider';
             div.textContent = val;
             
-            // Меню удаления по клику на саму плашку
             div.onclick = function(e) {
                 e.stopPropagation();
                 selectedMsgRow = this;
@@ -524,7 +378,6 @@
             const isSeen = isSeenCheckbox.checked;
             let forwardedAdded = false;
             
-            // Логика формирования подписи Просмотрено
             let seenHtml = '';
             if (sender === 'right' && isSeen) {
                 const customTime = seenTextInput.value.trim();
@@ -542,7 +395,6 @@
                 }
                 imgHtml += `<img src="${currentAttachedImageSrc}" class="msg msg-image-attachment" crossorigin="anonymous">`;
                 
-                // Если нет текста и сторис, добавляем статус "Просмотрено" под картинку
                 if (!text && !currentStorySrc) {
                     imgHtml += seenHtml;
                 }
@@ -581,7 +433,6 @@
 
                 if (text) { html += `<div class="msg">${text}</div>`; }
                 
-                // Добавляем статус "Просмотрено" в самый конец блока
                 html += seenHtml;
 
                 if (html !== '') { createRowElement(sender, html); }
@@ -589,7 +440,6 @@
 
             messageInput.value = ''; messagesBox.scrollTop = messagesBox.scrollHeight;
             
-            // Сбрасываем чекбоксы
             isForwardedCheckbox.checked = false; 
             isSeenCheckbox.checked = false;
             seenTextInput.style.display = 'none';
@@ -597,6 +447,9 @@
 
             if (replyingToText) cancelReply(); if (currentStorySrc) cancelStory(); if (currentAttachedImageSrc) cancelAttachedImage();
             updateVisuals();
+            
+            // Если мы на мобилке, после отправки логично переключиться на превью, 
+            // но можно оставить пользователя в настройках для ввода следующей фразы. Оставляем как есть.
         }
 
         function handleReply() {
@@ -604,9 +457,22 @@
             contextMenu.style.display = 'none';
             const msgNode = selectedMsgRow.querySelector('.msg');
             if(!msgNode) return; 
-            if (msgNode.tagName.toLowerCase() === 'img') { replyingToText = '📷 Фото'; } 
-            else { replyingToText = msgNode.innerHTML.replace(/<br\s*[\/]?>/gi, ' '); }
-            replyPreview.textContent = replyingToText; replyIndicator.style.display = 'block';
+            
+            let fullText = "";
+            if (msgNode.tagName.toLowerCase() === 'img') { 
+                fullText = '📷 Фото'; 
+            } else { 
+                fullText = msgNode.innerHTML.replace(/<br\s*[\/]?>/gi, ' '); 
+            }
+
+            replyingToText = (fullText.length > 75) ? fullText.substring(0, 72).trim() + '...' : fullText;
+            
+            document.getElementById('replyPreview').textContent = replyingToText; 
+            document.getElementById('replyIndicator').style.display = 'block';
+            
+            // Если мы на мобилке, возвращаем пользователя на вкладку настроек, чтобы он ввел ответ
+            if (window.innerWidth <= 950) { toggleMobileTab('controls'); }
+            
             cancelStory(); cancelAttachedImage();
         }
 
@@ -620,6 +486,8 @@
             if (editingMsgNode.tagName.toLowerCase() === 'img') { alert('Картинки нельзя редактировать!'); editingMsgNode = null; return; }
             let currentText = editingMsgNode.innerHTML.replace(/<br\s*[\/]?>/gi, '\n');
             messageInput.value = currentText; mainActionBtn.textContent = '💾 Сохранить изменения'; mainActionBtn.style.background = '#4CAF50';
+            
+            if (window.innerWidth <= 950) { toggleMobileTab('controls'); }
         }
 
         function handleDelete() {
@@ -648,7 +516,7 @@
             const phoneRect = phoneWrapper.getBoundingClientRect(); 
             
             msgs.forEach((row, i) => {
-                if(row.classList.contains('time-divider')) return; // Пропускаем логику скругления для плашки
+                if(row.classList.contains('time-divider')) return;
 
                 const isRight = row.classList.contains('right');
                 const msg = row.querySelector('.msg');
@@ -656,7 +524,6 @@
                 const prev = msgs[i-1];
                 const next = msgs[i+1];
                 
-                // Проверяем соседние сообщения, игнорируя плашки времени
                 const prevSame = prev && prev.classList.contains(isRight ? 'right' : 'left');
                 const nextSame = next && next.classList.contains(isRight ? 'right' : 'left');
 
@@ -688,11 +555,22 @@
 
         function downloadChat() {
             contextMenu.style.display = 'none';
+            
+            // Если мы на мобилке на вкладке настроек, принудительно показываем превью для скрина
+            const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
+            if (wasHidden) { document.body.classList.add('show-preview'); }
+
             phoneWrapper.style.borderRadius = '0'; phoneWrapper.style.border = 'none'; phoneWrapper.style.boxShadow = 'none';
-            html2canvas(phoneWrapper, { scale: 3, useCORS: true, allowTaint: true, backgroundColor: '#0d1015', logging: false }).then(canvas => {
-                phoneWrapper.style.borderRadius = '40px'; phoneWrapper.style.border = '1px solid #222'; phoneWrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.6)';
-                const link = document.createElement('a'); link.download = 'ig_chat.png'; link.href = canvas.toDataURL('image/png'); link.click();
-            });
+            
+            setTimeout(() => {
+                html2canvas(phoneWrapper, { scale: 3, useCORS: true, allowTaint: true, backgroundColor: '#0d1015', logging: false }).then(canvas => {
+                    phoneWrapper.style.borderRadius = '40px'; phoneWrapper.style.border = '1px solid #222'; phoneWrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.6)';
+                    
+                    if (wasHidden) { document.body.classList.remove('show-preview'); }
+
+                    const link = document.createElement('a'); link.download = 'ig_chat.png'; link.href = canvas.toDataURL('image/png'); link.click();
+                });
+            }, 100); // Небольшая задержка для рендера, если вкладка только что переключилась
         }
 
         // --- ЭКСПОРТ И ИМПОРТ БИБЛИОТЕКИ ---
