@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="export.js?v=1"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram DM Generator</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=5">
+    
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <script src="export.js?v=2"></script>
+    <script src="library.js?v=1"></script>
+    <script src="scene_personal.js?v=1"></script>
 </head>
 <body>
     <div class="sidebar">
@@ -134,11 +135,11 @@
             </select>
             
             <button id="mainActionBtn" onclick="addMessage()">Добавить сообщение</button>
-           <div style="display: flex; gap: 10px; margin-top: 5px;">
-            <button onclick="clearChat()" style="background: #333; flex: 1; font-size: 13px;">Очистить</button>
-            <button onclick="downloadChat()" style="background: #fff; color: #000; flex: 1.5; font-size: 13px;">📸 Один скрин</button>
-            <button id="zipBtn" onclick="downloadChatAsZip('personal')" style="background: #4CAF50; color: #fff; flex: 1.5; font-size: 13px;">📦 Нарезка (ZIP)</button>
-           </div>
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <button onclick="clearChat()" style="background: #333; flex: 1; font-size: 13px;">Очистить</button>
+                <button onclick="downloadChat()" style="background: #fff; color: #000; flex: 1.5; font-size: 13px;">📸 Один скрин</button>
+                <button id="zipBtn" onclick="downloadChatAsZip('personal')" style="background: #4CAF50; color: #fff; flex: 1.5; font-size: 13px;">📦 Нарезка (ZIP)</button>
+            </div>
         </div>
     </div>
 
@@ -174,30 +175,7 @@
     </div>
 
     <script>
-        // ЛОГИКА МОБИЛЬНЫХ ВКЛАДОК (БРОНЕБОЙНАЯ ВЕРСИЯ)
-        function toggleMobileTab(tab) {
-            const body = document.body;
-            if (tab === 'preview') {
-                body.classList.add('show-preview');
-                document.getElementById('tabPreview').classList.add('active');
-                document.getElementById('tabControls').classList.remove('active');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                
-                // Магия для Android: заставляем браузер точно закончить отрисовку
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        setTimeout(() => {
-                            if (typeof updateVisuals === 'function') updateVisuals();
-                        }, 150); // 150мс точно хватит любому Андроиду
-                    });
-                });
-            } else {
-                body.classList.remove('show-preview');
-                document.getElementById('tabControls').classList.add('active');
-                document.getElementById('tabPreview').classList.remove('active');
-            }
-        }
-
+        // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И ДВИЖОК ЧАТА ---
         const leftNameInput = document.getElementById('leftName');
         const leftSubtitleInput = document.getElementById('leftSubtitle');
         const timeInput = document.getElementById('timeInput');
@@ -228,52 +206,28 @@
         let currentStorySrc = null;
         let currentAttachedImageSrc = null;
 
-        const defaultCharacters = {};
-
-        let savedCharacters = JSON.parse(localStorage.getItem('ig_dm_characters_v1')) || defaultCharacters;
-
-        function updateCharDropdown() {
-            characterSelect.innerHTML = '<option value="">-- Выбери или создай --</option>';
-            for (let name in savedCharacters) {
-                let opt = document.createElement('option');
-                opt.value = name;
-                opt.textContent = name;
-                characterSelect.appendChild(opt);
+        // ЛОГИКА МОБИЛЬНЫХ ВКЛАДОК 
+        function toggleMobileTab(tab) {
+            const body = document.body;
+            if (tab === 'preview') {
+                body.classList.add('show-preview');
+                document.getElementById('tabPreview').classList.add('active');
+                document.getElementById('tabControls').classList.remove('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        setTimeout(() => { if (typeof updateVisuals === 'function') updateVisuals(); }, 150);
+                    });
+                });
+            } else {
+                body.classList.remove('show-preview');
+                document.getElementById('tabControls').classList.add('active');
+                document.getElementById('tabPreview').classList.remove('active');
             }
         }
 
-        function loadCharacter() {
-            const name = characterSelect.value;
-            if (!name) return; 
-            const char = savedCharacters[name];
-            leftNameInput.value = name;
-            leftSubtitleInput.value = char.subtitle;
-            leftAvatarInput.value = char.avatar;
-            currentAvatarSrc = char.avatar;
-            document.getElementById('headerName').textContent = name;
-            document.getElementById('headerSubtitle').textContent = char.subtitle;
-            updateAllAvatars();
-        }
-
-        function saveCharacter() {
-            const name = leftNameInput.value.trim();
-            if(!name || name === "Введите имя...") { alert("Сначала введи имя!"); return; }
-            savedCharacters[name] = { avatar: currentAvatarSrc, subtitle: leftSubtitleInput.value };
-            localStorage.setItem('ig_dm_characters_v1', JSON.stringify(savedCharacters));
-            updateCharDropdown(); characterSelect.value = name; alert("Сохранено!");
-        }
-
-        function deleteCharacter() {
-            const name = characterSelect.value;
-            if(!name) return;
-            if(confirm(`Удалить "${name}"?`)) {
-                delete savedCharacters[name];
-                localStorage.setItem('ig_dm_characters_v1', JSON.stringify(savedCharacters));
-                updateCharDropdown(); characterSelect.value = "";
-            }
-        }
-        updateCharDropdown();
-
+        // ОБНОВЛЕНИЕ ШАПКИ
         leftNameInput.addEventListener('input', () => document.getElementById('headerName').textContent = leftNameInput.value);
         leftSubtitleInput.addEventListener('input', () => document.getElementById('headerSubtitle').textContent = leftSubtitleInput.value);
         timeInput.addEventListener('input', () => iosTimeDisplay.textContent = timeInput.value);
@@ -303,6 +257,7 @@
             iosTimeDisplay.style.left = document.getElementById('timePosX').value + 'px';
         }
 
+        // МЕДИА ВЛОЖЕНИЯ
         document.getElementById('storyUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -329,6 +284,7 @@
 
         function cancelAttachedImage() { currentAttachedImageSrc = null; document.getElementById('imageAttachUpload').value = ''; document.getElementById('attachedImagePreview').style.display = 'none'; document.getElementById('cancelAttachedImageBtn').style.display = 'none'; }
 
+        // ДОБАВЛЕНИЕ СООБЩЕНИЙ В ЧАТ
         messagesBox.addEventListener('scroll', updateVisuals);
         document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
 
@@ -340,15 +296,11 @@
             div.textContent = val;
             
             div.onclick = function(e) {
-                e.stopPropagation();
-                selectedMsgRow = this;
+                e.stopPropagation(); selectedMsgRow = this;
                 const wrapperRect = phoneWrapper.getBoundingClientRect();
-                let x = e.clientX - wrapperRect.left;
-                let y = e.clientY - wrapperRect.top;
+                let x = e.clientX - wrapperRect.left; let y = e.clientY - wrapperRect.top;
                 if (x > 220) x -= 160; 
-                contextMenu.style.display = 'block';
-                contextMenu.style.left = x + 'px';
-                contextMenu.style.top = y + 'px';
+                contextMenu.style.display = 'block'; contextMenu.style.left = x + 'px'; contextMenu.style.top = y + 'px';
             };
 
             messagesBox.appendChild(div);
@@ -362,8 +314,7 @@
             msgDiv.className = `message-row ${sender}`;
             
             msgDiv.onclick = function(e) {
-                e.stopPropagation(); 
-                selectedMsgRow = this;
+                e.stopPropagation(); selectedMsgRow = this;
                 const wrapperRect = phoneWrapper.getBoundingClientRect();
                 let x = e.clientX - wrapperRect.left; let y = e.clientY - wrapperRect.top;
                 if (x > 220) x -= 160; 
@@ -410,17 +361,12 @@
                     forwardedAdded = true;
                 }
                 imgHtml += `<img src="${currentAttachedImageSrc}" class="msg msg-image-attachment" crossorigin="anonymous">`;
-                
-                if (!text && !currentStorySrc) {
-                    imgHtml += seenHtml;
-                }
-                
+                if (!text && !currentStorySrc) imgHtml += seenHtml;
                 createRowElement(sender, imgHtml);
             }
 
             if (text || currentStorySrc) {
                 let html = '';
-                
                 if (isForwarded && !forwardedAdded) {
                     const headerText = sender === 'right' ? 'Вы переслали сообщение' : 'Переслал(-а) сообщение';
                     const alignSelf = sender === 'right' ? 'flex-end' : 'flex-start';
@@ -448,47 +394,33 @@
                 }
 
                 if (text) { html += `<div class="msg">${text}</div>`; }
-                
                 html += seenHtml;
 
                 if (html !== '') { createRowElement(sender, html); }
             }
 
             messageInput.value = ''; messagesBox.scrollTop = messagesBox.scrollHeight;
-            
-            isForwardedCheckbox.checked = false; 
-            isSeenCheckbox.checked = false;
-            seenTextInput.style.display = 'none';
-            seenTextInput.value = '';
+            isForwardedCheckbox.checked = false; isSeenCheckbox.checked = false;
+            seenTextInput.style.display = 'none'; seenTextInput.value = '';
 
             if (replyingToText) cancelReply(); if (currentStorySrc) cancelStory(); if (currentAttachedImageSrc) cancelAttachedImage();
             updateVisuals();
-            
-            // Если мы на мобилке, после отправки логично переключиться на превью, 
-            // но можно оставить пользователя в настройках для ввода следующей фразы. Оставляем как есть.
         }
 
+        // КОНТЕКСТНОЕ МЕНЮ И ЛОГИКА СООБЩЕНИЙ
         function handleReply() {
             if (!selectedMsgRow || selectedMsgRow.classList.contains('time-divider')) { contextMenu.style.display = 'none'; return; }
             contextMenu.style.display = 'none';
             const msgNode = selectedMsgRow.querySelector('.msg');
             if(!msgNode) return; 
             
-            let fullText = "";
-            if (msgNode.tagName.toLowerCase() === 'img') { 
-                fullText = '📷 Фото'; 
-            } else { 
-                fullText = msgNode.innerHTML.replace(/<br\s*[\/]?>/gi, ' '); 
-            }
-
+            let fullText = (msgNode.tagName.toLowerCase() === 'img') ? '📷 Фото' : msgNode.innerHTML.replace(/<br\s*[\/]?>/gi, ' '); 
             replyingToText = (fullText.length > 60) ? fullText.substring(0, 57).trim() + '...' : fullText;
             
             document.getElementById('replyPreview').textContent = replyingToText; 
             document.getElementById('replyIndicator').style.display = 'block';
             
-            // Если мы на мобилке, возвращаем пользователя на вкладку настроек, чтобы он ввел ответ
             if (window.innerWidth <= 950) { toggleMobileTab('controls'); }
-            
             cancelStory(); cancelAttachedImage();
         }
 
@@ -519,10 +451,8 @@
         function clearChat() {
             if(confirm('Точно очистить весь чат?')) {
                 messagesBox.innerHTML = ''; editingMsgNode = null; cancelReply(); cancelStory(); cancelAttachedImage();
-                isForwardedCheckbox.checked = false; 
-                isSeenCheckbox.checked = false;
-                seenTextInput.style.display = 'none';
-                seenTextInput.value = '';
+                isForwardedCheckbox.checked = false; isSeenCheckbox.checked = false;
+                seenTextInput.style.display = 'none'; seenTextInput.value = '';
                 mainActionBtn.textContent = 'Добавить сообщение'; mainActionBtn.style.background = '#0095f6';
             }
         }
@@ -531,8 +461,6 @@
             const msgs = Array.from(messagesBox.children);
             const phoneRect = phoneWrapper.getBoundingClientRect(); 
             
-            // ЗАЩИТА: Если телефон скрыт (мы на вкладке настроек на мобилке), 
-            // прерываем функцию, чтобы не сломать градиент!
             if (phoneRect.height === 0) return;
             
             msgs.forEach((row, i) => {
@@ -575,8 +503,6 @@
 
         function downloadChat() {
             contextMenu.style.display = 'none';
-            
-            // Если мы на мобилке на вкладке настроек, принудительно показываем превью для скрина
             const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
             if (wasHidden) { document.body.classList.add('show-preview'); }
 
@@ -585,120 +511,10 @@
             setTimeout(() => {
                 html2canvas(phoneWrapper, { scale: 3, useCORS: true, allowTaint: true, backgroundColor: '#0d1015', logging: false }).then(canvas => {
                     phoneWrapper.style.borderRadius = '40px'; phoneWrapper.style.border = '1px solid #222'; phoneWrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.6)';
-                    
                     if (wasHidden) { document.body.classList.remove('show-preview'); }
-
                     const link = document.createElement('a'); link.download = 'ig_chat.png'; link.href = canvas.toDataURL('image/png'); link.click();
                 });
-            }, 100); // Небольшая задержка для рендера, если вкладка только что переключилась
-        }
-
-        // --- ЭКСПОРТ И ИМПОРТ БИБЛИОТЕКИ ---
-        function exportLibrary() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedCharacters));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "ig_library.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        }
-
-        function importLibrary(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    savedCharacters = { ...savedCharacters, ...importedData };
-                    localStorage.setItem('ig_dm_characters_v1', JSON.stringify(savedCharacters));
-                    updateCharDropdown();
-                    alert("Библиотека успешно загружена! 📚✨");
-                } catch (err) {
-                    alert("Ошибка: файл поврежден или имеет неверный формат.");
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = ''; 
-        }
-
-    // --- ЭКСПОРТ И ИМПОРТ ВСЕГО ЧАТА (index.html) ---
-        function exportChat() {
-            try {
-                const chatData = {
-                    leftName: document.getElementById('leftName').value,
-                    leftSubtitle: document.getElementById('leftSubtitle').value,
-                    leftAvatar: document.getElementById('leftAvatar').value,
-                    timeInput: document.getElementById('timeInput').value,
-                    htmlContent: messagesBox.innerHTML
-                };
-                
-                const jsonStr = JSON.stringify(chatData);
-                const blob = new Blob([jsonStr], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `scene_personal_${Date.now()}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                URL.revokeObjectURL(url);
-            } catch (err) {
-                console.error(err);
-                alert("Ошибка при сохранении: " + err.message);
-            }
-        }
-
-        function importChat(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if(data.htmlContent === undefined) throw new Error("Неверный формат");
-                    
-                    // Восстанавливаем настройки шапки
-                    document.getElementById('leftName').value = data.leftName || '';
-                    document.getElementById('headerName').textContent = data.leftName || 'Введите имя...';
-                    
-                    document.getElementById('leftSubtitle').value = data.leftSubtitle || '';
-                    document.getElementById('headerSubtitle').textContent = data.leftSubtitle || '';
-                    
-                    document.getElementById('leftAvatar').value = data.leftAvatar || '';
-                    currentAvatarSrc = data.leftAvatar || 'https://i.pravatar.cc/150';
-                    updateAllAvatars(); // Обновляет все аватарки в чате
-                    
-                    document.getElementById('timeInput').value = data.timeInput || '';
-                    document.getElementById('iosTimeDisplay').textContent = data.timeInput || '';
-                    
-                    // Вставляем сообщения
-                    messagesBox.innerHTML = data.htmlContent;
-                    
-                    // Оживляем клики
-                    const items = messagesBox.querySelectorAll('.message-row, .time-divider');
-                    items.forEach(item => {
-                        item.onclick = function(ev) {
-                            ev.stopPropagation(); selectedMsgRow = this;
-                            const wrapperRect = phoneWrapper.getBoundingClientRect();
-                            let x = ev.clientX - wrapperRect.left; let y = ev.clientY - wrapperRect.top;
-                            if (x > 220) x -= 160; 
-                            contextMenu.style.display = 'block'; contextMenu.style.left = x + 'px'; contextMenu.style.top = y + 'px';
-                        };
-                    });
-
-                    updateVisuals();
-                    alert("Личная сцена успешно загружена! 🪄");
-                } catch (err) {
-                    alert("Ошибка: файл поврежден или это не сохранение чата.");
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
+            }, 100); 
         }
     </script>
 </body>
