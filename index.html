@@ -212,13 +212,7 @@
         let currentStorySrc = null;
         let currentAttachedImageSrc = null;
 
-        const defaultCharacters = {
-            "Hermione Granger": { avatar: "https://i.pravatar.cc/150?img=47", subtitle: "В сети" },
-            "Theodore Nott": { avatar: "https://i.pravatar.cc/150?img=11", subtitle: "Был(а) недавно" },
-            "Джинни": { avatar: "https://i.pravatar.cc/150?img=35", subtitle: "В сети" },
-            "Astarion": { avatar: "https://i.pravatar.cc/150?img=68", subtitle: "В сети" },
-            "Minthara": { avatar: "https://i.pravatar.cc/150?img=44", subtitle: "Не беспокоить" }
-        };
+        const defaultCharacters = {};
 
         let savedCharacters = JSON.parse(localStorage.getItem('ig_dm_characters_v1')) || defaultCharacters;
 
