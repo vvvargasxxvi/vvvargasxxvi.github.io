@@ -472,7 +472,7 @@
                 fullText = msgNode.innerHTML.replace(/<br\s*[\/]?>/gi, ' '); 
             }
 
-            replyingToText = (fullText.length > 75) ? fullText.substring(0, 72).trim() + '...' : fullText;
+            replyingToText = (fullText.length > 60) ? fullText.substring(0, 57).trim() + '...' : fullText;
             
             document.getElementById('replyPreview').textContent = replyingToText; 
             document.getElementById('replyIndicator').style.display = 'block';
