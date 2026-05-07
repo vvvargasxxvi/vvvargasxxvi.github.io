@@ -640,6 +640,38 @@
             link.click();
         }
 
+        // --- ЭКСПОРТ И ИМПОРТ ВСЕГО ЧАТА ---
+        function exportChat() {
+            try {
+                const chatData = {
+                    groupName: document.getElementById('groupName').value,
+                    avTop: document.getElementById('avTop').value,
+                    avBottom: document.getElementById('avBottom').value,
+                    timeHeader: document.getElementById('timeHeader').value,
+                    htmlContent: messagesBox.innerHTML
+                };
+                
+                // Создаем полноценный файл в памяти браузера
+                const jsonStr = JSON.stringify(chatData);
+                const blob = new Blob([jsonStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                
+                // Создаем ссылку, добавляем на страницу, кликаем и убираем за собой
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `scene_group_${Date.now()}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Очищаем память
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error(err);
+                alert("Ошибка при сохранении: " + err.message);
+            }
+        }
+
         function importChat(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -684,7 +716,6 @@
             reader.readAsText(file);
             event.target.value = ''; // Сбрасываем инпут
         }
-        
     </script>
 </body>
 </html>
