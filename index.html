@@ -172,9 +172,12 @@
                 body.classList.add('show-preview');
                 document.getElementById('tabPreview').classList.add('active');
                 document.getElementById('tabControls').classList.remove('active');
-                
-                // Прокручиваем к телефону (для удобства)
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // МАГИЯ ЗДЕСЬ: даем браузеру миллисекунду на показ телефона и заставляем пересчитать градиент
+                setTimeout(() => {
+                    if (typeof updateVisuals === 'function') updateVisuals();
+                }, 50);
             } else {
                 body.classList.remove('show-preview');
                 document.getElementById('tabControls').classList.add('active');
