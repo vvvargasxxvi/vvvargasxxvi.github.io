@@ -74,6 +74,15 @@
             </details>
 
             <details class="control-section">
+                <summary>💾 Сохранение / Загрузка чата</summary>
+                <div class="section-content">
+                    <button onclick="exportChat()" style="background: #333; font-size: 13px;">📥 Сохранить этот чат (JSON)</button>
+                    <input type="file" id="importChatInput" accept=".json" style="display: none;" onchange="importChat(event)">
+                    <button onclick="document.getElementById('importChatInput').click()" style="background: #333; font-size: 13px;">📤 Загрузить чат из файла</button>
+                </div>
+            </details>
+
+            <details class="control-section">
                 <summary>📎 Прикрепить медиа</summary>
                 <div class="section-content">
                     <div id="storyUploadBlock" style="padding-bottom: 10px; border-bottom: 1px dashed #444;">
@@ -472,7 +481,7 @@
                 fullText = msgNode.innerHTML.replace(/<br\s*[\/]?>/gi, ' '); 
             }
 
-            replyingToText = (fullText.length > 61) ? fullText.substring(0, 58).trim() + '...' : fullText;
+            replyingToText = (fullText.length > 60) ? fullText.substring(0, 57).trim() + '...' : fullText;
             
             document.getElementById('replyPreview').textContent = replyingToText; 
             document.getElementById('replyIndicator').style.display = 'block';
@@ -613,6 +622,69 @@
             reader.readAsText(file);
             event.target.value = ''; 
         }
+
+        // --- ЭКСПОРТ И ИМПОРТ ВСЕГО ЧАТА ---
+        function exportChat() {
+            const chatData = {
+                groupName: document.getElementById('groupName').value,
+                avTop: document.getElementById('avTop').value,
+                avBottom: document.getElementById('avBottom').value,
+                timeHeader: document.getElementById('timeHeader').value,
+                htmlContent: messagesBox.innerHTML
+            };
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chatData));
+            const link = document.createElement('a');
+            link.href = dataStr;
+            link.download = `scene_group_${Date.now()}.json`;
+            link.click();
+        }
+
+        function importChat(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if(data.htmlContent === undefined) throw new Error("Неверный формат");
+                    
+                    // Восстанавливаем настройки шапки
+                    document.getElementById('groupName').value = data.groupName || '';
+                    document.getElementById('avTop').value = data.avTop || '';
+                    document.getElementById('avBottom').value = data.avBottom || '';
+                    document.getElementById('timeHeader').value = data.timeHeader || '';
+                    
+                    // Вставляем сами сообщения
+                    messagesBox.innerHTML = data.htmlContent;
+
+                    // Обновляем визуал шапки
+                    updateHeader();
+                    updateTimeHeader();
+                    
+                    // САМОЕ ВАЖНОЕ: Оживляем клики для меню (Ответить/Изменить/Удалить)
+                    const items = messagesBox.querySelectorAll('.message-row, .time-divider');
+                    items.forEach(item => {
+                        item.onclick = function(ev) {
+                            ev.stopPropagation(); selectedMsgRow = this;
+                            const wrapperRect = phoneWrapper.getBoundingClientRect();
+                            let x = ev.clientX - wrapperRect.left; let y = ev.clientY - wrapperRect.top;
+                            if (x > 220) x -= 160; 
+                            contextMenu.style.display = 'block'; contextMenu.style.left = x + 'px'; contextMenu.style.top = y + 'px';
+                        };
+                    });
+
+                    updateVisuals();
+                    alert("Сцена успешно загружена! 🪄");
+                } catch (err) {
+                    alert("Ошибка: файл поврежден или это не сохранение чата.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Сбрасываем инпут
+        }
+        
     </script>
 </body>
 </html>
