@@ -623,48 +623,28 @@
             event.target.value = ''; 
         }
 
-        // --- ЭКСПОРТ И ИМПОРТ ВСЕГО ЧАТА ---
-        function exportChat() {
-            const chatData = {
-                groupName: document.getElementById('groupName').value,
-                avTop: document.getElementById('avTop').value,
-                avBottom: document.getElementById('avBottom').value,
-                timeHeader: document.getElementById('timeHeader').value,
-                htmlContent: messagesBox.innerHTML
-            };
-            
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chatData));
-            const link = document.createElement('a');
-            link.href = dataStr;
-            link.download = `scene_group_${Date.now()}.json`;
-            link.click();
-        }
-
-        // --- ЭКСПОРТ И ИМПОРТ ВСЕГО ЧАТА ---
+    // --- ЭКСПОРТ И ИМПОРТ ВСЕГО ЧАТА (index.html) ---
         function exportChat() {
             try {
                 const chatData = {
-                    groupName: document.getElementById('groupName').value,
-                    avTop: document.getElementById('avTop').value,
-                    avBottom: document.getElementById('avBottom').value,
-                    timeHeader: document.getElementById('timeHeader').value,
+                    leftName: document.getElementById('leftName').value,
+                    leftSubtitle: document.getElementById('leftSubtitle').value,
+                    leftAvatar: document.getElementById('leftAvatar').value,
+                    timeInput: document.getElementById('timeInput').value,
                     htmlContent: messagesBox.innerHTML
                 };
                 
-                // Создаем полноценный файл в памяти браузера
                 const jsonStr = JSON.stringify(chatData);
                 const blob = new Blob([jsonStr], { type: "application/json" });
                 const url = URL.createObjectURL(blob);
                 
-                // Создаем ссылку, добавляем на страницу, кликаем и убираем за собой
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `scene_group_${Date.now()}.json`;
+                link.download = `scene_personal_${Date.now()}.json`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 
-                // Очищаем память
                 URL.revokeObjectURL(url);
             } catch (err) {
                 console.error(err);
@@ -683,19 +663,23 @@
                     if(data.htmlContent === undefined) throw new Error("Неверный формат");
                     
                     // Восстанавливаем настройки шапки
-                    document.getElementById('groupName').value = data.groupName || '';
-                    document.getElementById('avTop').value = data.avTop || '';
-                    document.getElementById('avBottom').value = data.avBottom || '';
-                    document.getElementById('timeHeader').value = data.timeHeader || '';
+                    document.getElementById('leftName').value = data.leftName || '';
+                    document.getElementById('headerName').textContent = data.leftName || 'Введите имя...';
                     
-                    // Вставляем сами сообщения
+                    document.getElementById('leftSubtitle').value = data.leftSubtitle || '';
+                    document.getElementById('headerSubtitle').textContent = data.leftSubtitle || '';
+                    
+                    document.getElementById('leftAvatar').value = data.leftAvatar || '';
+                    currentAvatarSrc = data.leftAvatar || 'https://i.pravatar.cc/150';
+                    updateAllAvatars(); // Обновляет все аватарки в чате
+                    
+                    document.getElementById('timeInput').value = data.timeInput || '';
+                    document.getElementById('iosTimeDisplay').textContent = data.timeInput || '';
+                    
+                    // Вставляем сообщения
                     messagesBox.innerHTML = data.htmlContent;
-
-                    // Обновляем визуал шапки
-                    updateHeader();
-                    updateTimeHeader();
                     
-                    // САМОЕ ВАЖНОЕ: Оживляем клики для меню (Ответить/Изменить/Удалить)
+                    // Оживляем клики
                     const items = messagesBox.querySelectorAll('.message-row, .time-divider');
                     items.forEach(item => {
                         item.onclick = function(ev) {
@@ -708,13 +692,13 @@
                     });
 
                     updateVisuals();
-                    alert("Сцена успешно загружена! 🪄");
+                    alert("Личная сцена успешно загружена! 🪄");
                 } catch (err) {
                     alert("Ошибка: файл поврежден или это не сохранение чата.");
                 }
             };
             reader.readAsText(file);
-            event.target.value = ''; // Сбрасываем инпут
+            event.target.value = '';
         }
     </script>
 </body>
