@@ -1,4 +1,4 @@
-// --- БИБЛИОТЕКА ПЕРСОНАЖЕВ (Модуль) --- 
+// --- БИБЛИОТЕКА ПЕРСОНАЖЕЙ (Универсальный Модуль) ---
 let savedCharacters = JSON.parse(localStorage.getItem('ig_dm_characters_v1')) || {};
 
 function updateCharDropdown() {
@@ -15,46 +15,62 @@ function updateCharDropdown() {
 
 function loadCharacter() {
     const characterSelect = document.getElementById('characterSelect');
+    if (!characterSelect) return;
     const name = characterSelect.value;
     if (!name) return; 
     const char = savedCharacters[name];
     
-    document.getElementById('leftName').value = name;
-    document.getElementById('leftSubtitle').value = char.subtitle;
-    document.getElementById('leftAvatar').value = char.avatar;
+    // 1. Если мы в личном чате (index.html)
+    if (document.getElementById('leftName')) document.getElementById('leftName').value = name;
+    if (document.getElementById('leftSubtitle')) document.getElementById('leftSubtitle').value = char.subtitle || '';
+    if (document.getElementById('leftAvatar')) document.getElementById('leftAvatar').value = char.avatar || '';
+    if (document.getElementById('headerName')) document.getElementById('headerName').textContent = name;
+    if (document.getElementById('headerSubtitle')) document.getElementById('headerSubtitle').textContent = char.subtitle || '';
     
-    document.getElementById('headerName').textContent = name;
-    document.getElementById('headerSubtitle').textContent = char.subtitle;
-    
-    // Обновляем глобальную переменную и картинки в чате
+    // 2. Если мы в генераторе историй (story.html)
+    if (document.getElementById('storyUsername')) document.getElementById('storyUsername').value = name;
+    if (document.getElementById('storyAvatarUrl')) document.getElementById('storyAvatarUrl').value = char.avatar || '';
+    // Сразу дергаем функцию обновления превью истории, если она есть
+    if (typeof updateStoryHeader === 'function') updateStoryHeader();
+
+    // Обновляем глобальные аватарки для чата
     if (typeof currentAvatarSrc !== 'undefined') currentAvatarSrc = char.avatar;
     if (typeof updateAllAvatars === 'function') updateAllAvatars();
 }
 
 function saveCharacter() {
-    const leftNameInput = document.getElementById('leftName');
-    const leftSubtitleInput = document.getElementById('leftSubtitle');
     const characterSelect = document.getElementById('characterSelect');
     
-    const name = leftNameInput.value.trim();
+    // Ищем поле имени (в чате или в историях)
+    let nameInput = document.getElementById('leftName') || document.getElementById('storyUsername');
+    const name = nameInput ? nameInput.value.trim() : '';
     if(!name || name === "Введите имя...") { alert("Сначала введи имя!"); return; }
     
-    // Берем текущую аватарку (из глобальной переменной или напрямую из инпута)
-    const avatar = typeof currentAvatarSrc !== 'undefined' ? currentAvatarSrc : document.getElementById('leftAvatar').value;
+    const subtitle = document.getElementById('leftSubtitle') ? document.getElementById('leftSubtitle').value : "";
     
-    savedCharacters[name] = { avatar: avatar, subtitle: leftSubtitleInput.value };
+    // Ищем аватарку
+    let avatar = "";
+    if (typeof currentAvatarSrc !== 'undefined' && currentAvatarSrc !== "") {
+        avatar = currentAvatarSrc;
+    } else {
+        let avInput = document.getElementById('leftAvatar') || document.getElementById('storyAvatarUrl');
+        avatar = avInput ? avInput.value : "";
+    }
+    
+    savedCharacters[name] = { avatar: avatar, subtitle: subtitle };
     localStorage.setItem('ig_dm_characters_v1', JSON.stringify(savedCharacters));
     
     updateCharDropdown(); 
-    characterSelect.value = name; 
-    alert("Сохранено!");
+    if(characterSelect) characterSelect.value = name; 
+    alert("Персонаж сохранен! 💾");
 }
 
 function deleteCharacter() {
     const characterSelect = document.getElementById('characterSelect');
+    if (!characterSelect) return;
     const name = characterSelect.value;
     if(!name) return;
-    if(confirm(`Удалить "${name}"?`)) {
+    if(confirm(`Удалить "${name}" из базы?`)) {
         delete savedCharacters[name];
         localStorage.setItem('ig_dm_characters_v1', JSON.stringify(savedCharacters));
         updateCharDropdown(); 
@@ -91,5 +107,4 @@ function importLibrary(event) {
     event.target.value = ''; 
 }
 
-// Запускаем сборку списка сразу после загрузки страницы
 document.addEventListener('DOMContentLoaded', updateCharDropdown);
