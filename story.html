@@ -10,15 +10,17 @@
     <script src="library.js?v=3"></script>
 
     <style>
-        .phone-wrapper {
-            width: 375px !important;
-            height: 667px !important; 
-            max-height: none !important;
-            aspect-ratio: 9/16;
+        /* Убираем переопределение размеров телефона, пусть берет из style.css */
+        
+        .story-9-16-container {
+            width: 100%;
+            aspect-ratio: 9 / 16;
             position: relative;
-            overflow: hidden;
             background: #1a1a1a;
+            border-radius: 8px; /* Слегка скругляем углы, как в приложении */
+            overflow: hidden;
         }
+
         .story-bg {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -27,74 +29,79 @@
             background-position: center;
             z-index: 1;
         }
-        .story-status-bar {
-            position: absolute;
-            top: 0; left: 0; width: 100%;
-            padding: 14px 20px;
-            color: #fff;
-            font-size: 15px;
-            font-weight: 600;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            z-index: 10;
-            box-sizing: border-box;
-        }
+
+        /* Верхний градиент ИСТОРИИ (не телефона) */
         .story-overlay-top {
             position: absolute;
             top: 0; left: 0; width: 100%;
-            height: 140px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%);
+            height: 120px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
             z-index: 2;
             display: flex;
             flex-direction: column;
-            padding: 50px 12px 0 12px;
+            padding: 10px 0 0 0; /* Сверху 10px, по бокам 0 для полоски */
             box-sizing: border-box;
         }
+
         .story-progress {
             width: 100%; height: 2px;
             background: rgba(255,255,255,0.3);
-            border-radius: 2px;
             margin-bottom: 12px;
             overflow: hidden;
         }
+
         .story-progress-bar {
-            width: 50%; height: 100%; background: #fff; border-radius: 2px;
+            width: 50%; height: 100%; background: #fff;
         }
+
         .story-header-user {
             display: flex; align-items: center; gap: 10px;
+            padding: 0 12px; /* Возвращаем отступ для аватарки и текста */
         }
+
         .story-avatar {
             width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
         }
+
         .story-username-block {
             display: flex; flex-direction: column;
         }
+
         .story-username {
             color: #fff; font-size: 13px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 6px;
         }
+
         .story-time {
             color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 400;
         }
+
         .story-music {
             color: #fff; font-size: 11px; margin-top: 2px; display: flex; align-items: center; gap: 4px; text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
+
         .story-dots-close {
             margin-left: auto; display: flex; align-items: center; gap: 15px;
         }
+
         .story-dots {
             color: #fff; font-weight: bold; letter-spacing: 2px; font-size: 18px; line-height: 1; padding-bottom: 8px;
         }
+
         .story-overlay-bottom {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 90px;
             background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
             z-index: 2; display: flex; align-items: center; padding: 0 15px 15px 15px; box-sizing: border-box; gap: 15px;
         }
+
         .story-input-box {
             flex: 1; height: 44px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.4);
             display: flex; align-items: center; padding: 0 15px; color: #fff; font-size: 14px;
         }
+
         .story-icon {
             width: 26px; height: 26px;
         }
+
         .story-text-element {
             position: absolute; z-index: 3; color: #fff; font-size: 20px; font-weight: 600; text-align: left;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -129,12 +136,6 @@
                     <div style="display: flex; gap: 5px;">
                         <button onclick="saveCharacter()" style="flex: 1; background: #4CAF50; font-size: 12px; padding: 6px;">💾 Сохранить</button>
                         <button onclick="deleteCharacter()" style="flex: 1; background: #ed4956; font-size: 12px; padding: 6px;">🗑️ Удалить</button>
-                    </div>
-
-                    <div style="display: flex; gap: 5px; margin-top: 5px;">
-                        <button onclick="exportLibrary()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📥 Скачать базу</button>
-                        <input type="file" id="importLib" accept=".json" style="display: none;" onchange="importLibrary(event)">
-                        <button onclick="document.getElementById('importLib').click()" style="flex: 1; background: #333; font-size: 11px; padding: 6px;">📤 Загрузить</button>
                     </div>
                 </div>
             </details>
@@ -201,40 +202,53 @@
 
     <div class="phone-container">
         <div class="phone-wrapper" id="captureArea">
-            
-            <div id="storyBackground" class="story-bg"></div>
+            <div class="chat-container" style="background: #000; display: flex; flex-direction: column; height: 100%;">
+                
+                <div class="top-bar-container" style="position: relative; z-index: 10; min-height: 44px;">
+                    <img id="topBarImg" src="https://i.postimg.cc/CLHkRs4K/верхний_бар.png" crossorigin="anonymous" style="display: none;">
+                    <div id="iosTimeDisplay" style="color: #fff; position: absolute; left: 32px; top: 14px; font-size: 15px; font-weight: 600;">23:53</div>
+                </div>
 
-            <div class="story-status-bar" id="displaySystemTime">23:53</div>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; padding: 5px 0;">
+                    <div class="story-9-16-container">
+                        
+                        <div id="storyBackground" class="story-bg"></div>
 
-            <div id="storyTextDisplay" class="story-text-element">Как бы я не скучала по Хогвартсу,<br>иногда учеба утомляет даже меня 😮‍💨<br><br>Совсем не понимаю эту руну.</div>
+                        <div id="storyTextDisplay" class="story-text-element">Как бы я не скучала по Хогвартсу,<br>иногда учеба утомляет даже меня 😮‍💨<br><br>Совсем не понимаю эту руну.</div>
 
-            <div class="story-overlay-top">
-                <div class="story-progress"><div class="story-progress-bar"></div></div>
-                <div class="story-header-user">
-                    <img id="displayAvatar" class="story-avatar" src="https://i.pravatar.cc/150?img=35" crossorigin="anonymous">
-                    
-                    <div class="story-username-block">
-                        <div class="story-username">
-                            <span id="displayUsername">hj.granger_</span>
-                            <span id="displayTime" class="story-time">51 с.</span>
+                        <div class="story-overlay-top">
+                            <div class="story-progress"><div class="story-progress-bar"></div></div>
+                            <div class="story-header-user">
+                                <img id="displayAvatar" class="story-avatar" src="https://i.pravatar.cc/150?img=35" crossorigin="anonymous">
+                                <div class="story-username-block">
+                                    <div class="story-username">
+                                        <span id="displayUsername">hj.granger_</span>
+                                        <span id="displayTime" class="story-time">51 с.</span>
+                                    </div>
+                                    <div class="story-music" id="musicContainer">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="#fff"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                                        <span id="displayMusic">Oldies Playing · Quiet Comfort ></span>
+                                    </div>
+                                </div>
+                                <div class="story-dots-close">
+                                    <div class="story-dots">...</div>
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </div>
+                            </div>
                         </div>
-                        <div class="story-music" id="musicContainer">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="#fff"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                            <span id="displayMusic">Oldies Playing · Quiet Comfort ></span>
-                        </div>
-                    </div>
 
-                    <div class="story-dots-close">
-                        <div class="story-dots">...</div>
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        <div class="story-overlay-bottom" id="bottomBarUI">
+                            <div class="story-input-box">Отправить сообщение...</div>
+                            <svg class="story-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            <svg class="story-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="story-overlay-bottom" id="bottomBarUI">
-                <div class="story-input-box">Отправить сообщение...</div>
-                <svg class="story-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                <svg class="story-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                <div class="bottom-bar-container" style="position: relative; z-index: 10; min-height: 34px;">
+                    <img id="bottomBarImg" src="https://i.postimg.cc/SK5zBTm1/нижний_бар.png" crossorigin="anonymous" style="filter: invert(1);">
+                </div>
+                
             </div>
         </div>
     </div>
@@ -257,7 +271,7 @@
         function updateStoryHeader() {
             document.getElementById('displayUsername').textContent = document.getElementById('storyUsername').value;
             document.getElementById('displayTime').textContent = document.getElementById('storyTime').value;
-            document.getElementById('displaySystemTime').textContent = document.getElementById('systemTime').value;
+            document.getElementById('iosTimeDisplay').textContent = document.getElementById('systemTime').value;
             document.getElementById('displayAvatar').src = document.getElementById('storyAvatarUrl').value;
             
             const musicText = document.getElementById('storyMusic').value.trim();
@@ -318,7 +332,7 @@
             phoneWrapper.style.boxShadow = 'none';
             
             setTimeout(() => {
-                html2canvas(phoneWrapper, { scale: 3, useCORS: true, allowTaint: true, backgroundColor: '#1a1a1a' }).then(canvas => {
+                html2canvas(phoneWrapper, { scale: 3, useCORS: true, allowTaint: true, backgroundColor: '#000' }).then(canvas => {
                     phoneWrapper.style.borderRadius = '40px'; 
                     phoneWrapper.style.border = '1px solid #222'; 
                     phoneWrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.6)';
