@@ -13,41 +13,36 @@
         /* Фиксированный размер сторис с нужными пропорциями (1173:2532) */
         .phone-wrapper {
             width: 100%; 
-            max-width: 400px; /* Чтобы красиво смотрелось на экране компа/телефона */
+            max-width: 400px;
             aspect-ratio: 1173 / 2532;
             position: relative;
-            background-color: #0B1014; /* Тот самый темный фон */
+            background-color: #0B1014;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            /* Убрал скругления у самого айфона, чтобы картинка скачивалась ровным прямоугольником */
             border-radius: 0 !important; 
         }
 
-        /* Темная зона сверху */
         .top-dark-space {
-            height: 65px; /* Пустое пространство сверху */
+            height: 65px;
             width: 100%;
             background-color: #0B1014;
         }
 
-        /* Поле для самой фотографии (со скругленными краями) */
         .story-photo-area {
-            flex: 1; /* Занимает всё оставшееся место */
+            flex: 1;
             width: 100%;
             background-color: #1a1a1a;
-            border-radius: 10px; /* Скругленные края сверху и снизу */
+            border-radius: 10px;
             position: relative;
             overflow: hidden;
         }
 
-        /* Задний фон внутри поля фотографии */
         .story-bg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover; background-position: center; z-index: 1;
         }
 
-        /* Градиенты для читаемости текста (как в инсте) */
         .story-gradient-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 150px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
@@ -59,7 +54,6 @@
             z-index: 2; pointer-events: none;
         }
 
-        /* Шапка истории */
         .story-header-area {
             position: absolute; top: 15px; left: 0; width: 100%; z-index: 10; padding: 0 16px; box-sizing: border-box;
         }
@@ -94,7 +88,6 @@
             font-weight: bold; letter-spacing: 2px; font-size: 18px; line-height: 1; padding-bottom: 8px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
 
-        /* Текст истории */
         .story-text-element {
             position: absolute; z-index: 10; color: #fff; font-size: 15px; font-weight: 600; text-align: left;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -102,7 +95,6 @@
             line-height: 1.4;
         }
 
-        /* Стикер геолокации */
         .story-location-sticker {
             position: absolute; z-index: 10; left: 50%; top: 50%; transform: translateX(-50%);
             background: #f7e6df; color: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -110,11 +102,10 @@
             display: flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
-        /* Твой нижний бар-картинка */
         .bottom-image-bar {
             width: 100%;
             background: #0b1014;
-            margin-top: -2px; /* Убираем возможный белый зазор */
+            margin-top: -2px; 
         }
         .bottom-image-bar img {
             width: 100%;
@@ -165,7 +156,7 @@
             </details>
 
             <details class="control-section" open>
-                <summary>📝 Текст и Стикеры</summary>
+                <summary>📝 Текст истории</summary>
                 <div class="section-content">
                     <textarea id="storyTextInput" placeholder="Текст истории..." rows="3" style="font-family: inherit; resize: none;"></textarea>
                     
@@ -184,12 +175,27 @@
                             <input type="range" id="textPosY" min="15" max="85" value="35" style="width: 100%;" oninput="updatePosition('storyTextDisplay', 'textPosX', 'textPosY')">
                         </div>
                     </div>
-                    <button onclick="updateStoryText()" style="margin-top: 5px; margin-bottom: 15px;">Применить текст</button>
+                    <button onclick="updateStoryText()" style="margin-top: 5px; margin-bottom: 5px;">Применить текст</button>
+                </div>
+            </details>
 
-                    <hr style="border: 0; border-top: 1px dashed #444; margin: 10px 0;">
-                    
+            <details class="control-section">
+                <summary>📍 Стикер геолокации</summary>
+                <div class="section-content">
                     <input type="text" id="locationInput" placeholder="Геолокация (напр. Hogwarts...)" value="Hogwarts School of Witchcraft and Wizardry" oninput="updateLocation()">
-                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 8px;">
+                        <div style="flex: 1; display: flex; align-items: center; gap: 6px;">
+                            <input type="color" id="locBgColor" value="#f7e6df" style="width: 25px; height: 25px; padding: 0; border: none; border-radius: 4px; cursor: pointer;" oninput="updateLocationColors()">
+                            <span style="font-size: 11px; color: #aaa;">Фон стикера</span>
+                        </div>
+                        <div style="flex: 1; display: flex; align-items: center; gap: 6px;">
+                            <input type="color" id="locTextColor" value="#000000" style="width: 25px; height: 25px; padding: 0; border: none; border-radius: 4px; cursor: pointer;" oninput="updateLocationColors()">
+                            <span style="font-size: 11px; color: #aaa;">Цвет текста</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
                         <div style="flex: 1;">
                             <label style="font-size: 11px; color: #aaa;">Локация X:</label>
                             <input type="range" id="locPosX" min="0" max="100" value="50" style="width: 100%;" oninput="updatePosition('storyLocationDisplay', 'locPosX', 'locPosY')">
@@ -254,7 +260,7 @@
                 <div id="storyTextDisplay" class="story-text-element">Как бы я не скучала по Хогвартсу,<br>иногда учеба утомляет даже меня 😮‍💨<br><br>Совсем не понимаю эту руну.</div>
 
                 <div id="storyLocationDisplay" class="story-location-sticker">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <svg id="locIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                     <span id="locText">Hogwarts School of Witchcraft and Wizardry</span>
                 </div>
             </div>
@@ -321,6 +327,18 @@
             textElement.style.color = color;
         }
 
+        // Обновляем цвета гео-стикера
+        function updateLocationColors() {
+            const sticker = document.getElementById('storyLocationDisplay');
+            const icon = document.getElementById('locIcon');
+            const bgColor = document.getElementById('locBgColor').value;
+            const textColor = document.getElementById('locTextColor').value;
+            
+            sticker.style.backgroundColor = bgColor;
+            sticker.style.color = textColor;
+            icon.setAttribute('stroke', textColor);
+        }
+
         function updateLocation() {
             const text = document.getElementById('locationInput').value.trim();
             const isVisible = document.getElementById('showLocation').checked;
@@ -328,6 +346,8 @@
             
             document.getElementById('locText').textContent = text;
             sticker.style.display = (isVisible && text !== '') ? 'flex' : 'none';
+            
+            updateLocationColors(); // Применяем цвета при любом обновлении
         }
 
         function updatePosition(elementId, xInputId, yInputId) {
@@ -351,13 +371,12 @@
             const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
             if (wasHidden) { document.body.classList.add('show-preview'); }
 
-            // Математика для идеального экспорта в 1173x2532
             const targetWidth = 1173;
             const exportScale = targetWidth / phoneWrapper.offsetWidth;
 
             setTimeout(() => {
                 html2canvas(phoneWrapper, { 
-                    scale: exportScale, // Заставляем скрипт растянуть картинку до нужного пикселя
+                    scale: exportScale, 
                     useCORS: true, 
                     allowTaint: true, 
                     backgroundColor: '#0b1014' 
