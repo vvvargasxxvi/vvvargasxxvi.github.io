@@ -4,35 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram Story Generator</title>
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=8">
     
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="library.js?v=3"></script>
 
     <style>
-        /* Фиксированный размер сторис 9:16 */
+        /* Фиксированный размер сторис с нужными пропорциями (1173:2532) */
         .phone-wrapper {
-            width: 375px !important;
-            height: 667px !important; 
-            max-height: none !important;
-            aspect-ratio: 9/16;
+            width: 100%; 
+            max-width: 400px; /* Чтобы красиво смотрелось на экране компа/телефона */
+            aspect-ratio: 1173 / 2532;
+            position: relative;
+            background-color: #0b1014; /* Тот самый темный фон */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            /* Убрал скругления у самого айфона, чтобы картинка скачивалась ровным прямоугольником */
+            border-radius: 0 !important; 
+        }
+
+        /* Темная зона сверху */
+        .top-dark-space {
+            height: 65px; /* Пустое пространство сверху */
+            width: 100%;
+            background-color: #0b1014;
+        }
+
+        /* Поле для самой фотографии (со скругленными краями) */
+        .story-photo-area {
+            flex: 1; /* Занимает всё оставшееся место */
+            width: 100%;
+            background-color: #1a1a1a;
+            border-radius: 45px; /* Скругленные края сверху и снизу */
             position: relative;
             overflow: hidden;
-            background: #1a1a1a;
-            border-radius: 40px;
         }
 
-        /* Задний фон истории на весь телефон */
+        /* Задний фон внутри поля фотографии */
         .story-bg {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #1a1a1a;
-            background-size: cover;
-            background-position: center;
-            z-index: 1;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center; z-index: 1;
         }
 
-        /* Затемнения сверху и снизу для текста */
+        /* Градиенты для читаемости текста (как в инсте) */
         .story-gradient-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 160px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%);
@@ -44,28 +59,9 @@
             z-index: 2; pointer-events: none;
         }
 
-        /* Системный статус-бар iOS (Время, Батарея) */
-        .ios-status-bar {
-            position: absolute; top: 0; left: 0; width: 100%; height: 44px; z-index: 20;
-            display: flex; justify-content: space-between; align-items: center; padding: 14px 22px; box-sizing: border-box;
-        }
-        #iosTimeDisplay {
-            color: #fff; font-size: 15px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.5); letter-spacing: -0.2px;
-        }
-        .ios-icons {
-            display: flex; gap: 6px; align-items: center; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
-        }
-
-        /* Нижняя полоска свайпа iOS */
-        .ios-home-indicator {
-            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-            width: 134px; height: 5px; background: #fff; border-radius: 100px; z-index: 20;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-        }
-
-        /* Шапка истории (полоска, аватар, имя) */
+        /* Шапка истории */
         .story-header-area {
-            position: absolute; top: 55px; left: 0; width: 100%; z-index: 10; padding: 0 12px; box-sizing: border-box;
+            position: absolute; top: 15px; left: 0; width: 100%; z-index: 10; padding: 0 16px; box-sizing: border-box;
         }
         .story-progress {
             width: 100%; height: 2px; background: rgba(255,255,255,0.3); margin-bottom: 12px; overflow: hidden; border-radius: 1px;
@@ -114,17 +110,15 @@
             display: flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
-        /* Нижний интерфейс (сообщения, лайк, репост) */
-        .story-footer-area {
-            position: absolute; bottom: 30px; left: 0; width: 100%; z-index: 10;
-            display: flex; align-items: center; padding: 0 15px; box-sizing: border-box; gap: 15px;
+        /* Твой нижний бар-картинка */
+        .bottom-image-bar {
+            width: 100%;
+            background: #0b1014;
+            margin-top: -2px; /* Убираем возможный белый зазор */
         }
-        .story-input-box {
-            flex: 1; height: 44px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.4);
-            display: flex; align-items: center; padding: 0 15px; color: #fff; font-size: 14px; background: transparent;
-        }
-        .story-icon {
-            width: 26px; height: 26px; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
+        .bottom-image-bar img {
+            width: 100%;
+            display: block;
         }
     </style>
 </head>
@@ -166,7 +160,6 @@
                         <input type="text" id="storyAvatarUrl" placeholder="URL Аватарки" value="https://i.pravatar.cc/150?img=35" style="flex: 2;" oninput="updateStoryHeader()">
                         <input type="text" id="storyTime" placeholder="Время (напр. 51 с.)" value="51 с." style="flex: 1;" oninput="updateStoryHeader()">
                     </div>
-                    <input type="text" id="systemTime" placeholder="Системное время (23:53)" value="23:53" style="margin-top: 5px;" oninput="updateStoryHeader()">
                     <input type="text" id="storyMusic" placeholder="Трек (Oldies Playing...)" value="Oldies Playing · Quiet Comfort >" style="margin-top: 5px;" oninput="updateStoryHeader()">
                 </div>
             </details>
@@ -215,9 +208,6 @@
             <details class="control-section">
                 <summary>⚙️ Элементы интерфейса</summary>
                 <div class="section-content">
-                    <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer;">
-                        <input type="checkbox" id="showBottomBar" checked onchange="toggleElements()"> Показывать "Отправить сообщение"
-                    </label>
                     <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer; margin-top: 5px;">
                         <input type="checkbox" id="showTopHeader" checked onchange="toggleElements()"> Показывать автора и прогресс
                     </label>
@@ -233,56 +223,45 @@
     <div class="phone-container">
         <div class="phone-wrapper" id="captureArea">
             
-            <div id="storyBackground" class="story-bg"></div>
-            <div class="story-gradient-top" id="gradTop"></div>
-            <div class="story-gradient-bottom" id="gradBottom"></div>
+            <div class="top-dark-space"></div>
 
-            <div class="ios-status-bar">
-                <div id="iosTimeDisplay">23:53</div>
-                <div class="ios-icons">
-                    <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 12L0 4C2.2 1.8 5 0.5 8 0.5C11 0.5 13.8 1.8 16 4L8 12Z"/></svg>
-                    <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="#fff" stroke-width="1"/><path d="M24 4V8C24.5 8 25 7.5 25 7V5C25 4.5 24.5 4 24 4Z" fill="#fff"/><rect x="3" y="3" width="17" height="6" rx="1" fill="#fff"/></svg>
+            <div class="story-photo-area">
+                <div id="storyBackground" class="story-bg"></div>
+                <div class="story-gradient-top" id="gradTop"></div>
+                <div class="story-gradient-bottom" id="gradBottom"></div>
+
+                <div class="story-header-area" id="headerUI">
+                    <div class="story-progress"><div class="story-progress-bar"></div></div>
+                    <div class="story-header-user">
+                        <img id="displayAvatar" class="story-avatar" src="https://i.pravatar.cc/150?img=35" crossorigin="anonymous">
+                        <div class="story-username-block">
+                            <div class="story-username">
+                                <span id="displayUsername">hj.granger_</span>
+                                <span id="displayTime" class="story-time">51 с.</span>
+                            </div>
+                            <div class="story-music" id="musicContainer">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><rect x="4" y="10" width="3" height="8" rx="1"/><rect x="10" y="5" width="3" height="13" rx="1"/><rect x="16" y="12" width="3" height="6" rx="1"/></svg>
+                                <span id="displayMusic">Oldies Playing · Quiet Comfort ></span>
+                            </div>
+                        </div>
+                        <div class="story-actions">
+                            <div class="story-dots">...</div>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="storyTextDisplay" class="story-text-element">Как бы я не скучала по Хогвартсу,<br>иногда учеба утомляет даже меня 😮‍💨<br><br>Совсем не понимаю эту руну.</div>
+
+                <div id="storyLocationDisplay" class="story-location-sticker">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span id="locText">Hogwarts School of Witchcraft and Wizardry</span>
                 </div>
             </div>
 
-            <div class="story-header-area" id="headerUI">
-                <div class="story-progress"><div class="story-progress-bar"></div></div>
-                <div class="story-header-user">
-                    <img id="displayAvatar" class="story-avatar" src="https://i.pravatar.cc/150?img=35" crossorigin="anonymous">
-                    
-                    <div class="story-username-block">
-                        <div class="story-username">
-                            <span id="displayUsername">hj.granger_</span>
-                            <span id="displayTime" class="story-time">51 с.</span>
-                        </div>
-                        <div class="story-music" id="musicContainer">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><rect x="4" y="10" width="3" height="8" rx="1"/><rect x="10" y="5" width="3" height="13" rx="1"/><rect x="16" y="12" width="3" height="6" rx="1"/></svg>
-                            <span id="displayMusic">Oldies Playing · Quiet Comfort ></span>
-                        </div>
-                    </div>
-
-                    <div class="story-actions">
-                        <div class="story-dots">...</div>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </div>
-                </div>
+            <div class="bottom-image-bar" id="bottomBarUI">
+                <img src="https://i.postimg.cc/xCd5VcVR/bottom-bar-story.png" crossorigin="anonymous">
             </div>
-
-            <div id="storyTextDisplay" class="story-text-element">Как бы я не скучала по Хогвартсу,<br>иногда учеба утомляет даже меня 😮‍💨<br><br>Совсем не понимаю эту руну.</div>
-
-            <div id="storyLocationDisplay" class="story-location-sticker">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                <span id="locText">Hogwarts School of Witchcraft and Wizardry</span>
-            </div>
-
-            <div class="story-footer-area" id="bottomBarUI">
-                <div class="story-input-box">Отправить сообщение...</div>
-                <svg class="story-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                <svg class="story-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </div>
-
-            <div class="ios-home-indicator"></div>
 
         </div>
     </div>
@@ -305,7 +284,6 @@
         function updateStoryHeader() {
             document.getElementById('displayUsername').textContent = document.getElementById('storyUsername').value;
             document.getElementById('displayTime').textContent = document.getElementById('storyTime').value;
-            document.getElementById('iosTimeDisplay').textContent = document.getElementById('systemTime').value;
             document.getElementById('displayAvatar').src = document.getElementById('storyAvatarUrl').value;
             
             const musicText = document.getElementById('storyMusic').value.trim();
@@ -361,10 +339,9 @@
         }
 
         function toggleElements() {
-            document.getElementById('bottomBarUI').style.display = document.getElementById('showBottomBar').checked ? 'flex' : 'none';
             document.getElementById('headerUI').style.display = document.getElementById('showTopHeader').checked ? 'block' : 'none';
             
-            const showGradients = document.getElementById('showBottomBar').checked || document.getElementById('showTopHeader').checked;
+            const showGradients = document.getElementById('showTopHeader').checked;
             document.getElementById('gradTop').style.display = showGradients ? 'block' : 'none';
             document.getElementById('gradBottom').style.display = showGradients ? 'block' : 'none';
         }
@@ -374,18 +351,18 @@
             const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
             if (wasHidden) { document.body.classList.add('show-preview'); }
 
-            phoneWrapper.style.borderRadius = '0'; 
-            phoneWrapper.style.border = 'none'; 
-            phoneWrapper.style.boxShadow = 'none';
-            
+            // Математика для идеального экспорта в 1173x2532
+            const targetWidth = 1173;
+            const exportScale = targetWidth / phoneWrapper.offsetWidth;
+
             setTimeout(() => {
-                html2canvas(phoneWrapper, { scale: 3, useCORS: true, allowTaint: true, backgroundColor: '#1a1a1a' }).then(canvas => {
-                    phoneWrapper.style.borderRadius = '40px'; 
-                    phoneWrapper.style.border = '1px solid #222'; 
-                    phoneWrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.6)';
-                    
+                html2canvas(phoneWrapper, { 
+                    scale: exportScale, // Заставляем скрипт растянуть картинку до нужного пикселя
+                    useCORS: true, 
+                    allowTaint: true, 
+                    backgroundColor: '#0b1014' 
+                }).then(canvas => {
                     if (wasHidden) { document.body.classList.remove('show-preview'); }
-                    
                     const link = document.createElement('a'); 
                     link.download = `ig_story_${Date.now()}.png`; 
                     link.href = canvas.toDataURL('image/png'); 
