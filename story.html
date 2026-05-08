@@ -10,33 +10,25 @@
     <script src="library.js?v=3"></script>
 
     <style>
-        /* ДЕЛАЕМ МЕНЮ СКРОЛЛИРУЕМЫМ */
+        /* ЖЕСТКИЙ ФИКС СКРОЛЛА МЕНЮ */
         .controls-container {
-            overflow-y: auto;
-            max-height: 100vh; /* Ограничиваем высоту экраном */
-            padding-right: 10px; /* Отступ, чтобы скроллбар не прилипал к контенту */
+            overflow-y: auto !important;
+            height: 100vh !important; /* Принудительно на всю высоту экрана */
+            max-height: 100vh !important;
+            padding-right: 15px !important; /* Место под скроллбар */
+            box-sizing: border-box !important;
         }
 
-        /* Красивый тонкий скроллбар для меню */
-        .controls-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .controls-container::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .controls-container::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
-        .controls-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.4);
-        }
-
-        /* Запрещаем элементам сплющиваться */
         .controls {
-            flex-shrink: 0;
-            padding-bottom: 30px; /* Свободное место в самом низу меню */
+            height: max-content !important; /* Разрешаем контенту вываливаться вниз */
+            padding-bottom: 80px !important; /* Свободное место в самом низу меню */
         }
+
+        /* Красивый тонкий скроллбар */
+        .controls-container::-webkit-scrollbar { width: 6px; }
+        .controls-container::-webkit-scrollbar-track { background: transparent; }
+        .controls-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+        .controls-container::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
 
 
         /* Фиксированный размер сторис с нужными пропорциями (1173:2532) */
