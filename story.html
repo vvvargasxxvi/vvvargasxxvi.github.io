@@ -38,13 +38,11 @@
             overflow: hidden;
         }
 
-        /* МАГИЯ КАЧЕСТВА: теперь это картинка с object-fit */
         .story-bg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; z-index: 1;
         }
 
-        /* МАГИЯ ГРАДИЕНТОВ: прозрачность без полосок */
         .story-gradient-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 150px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%);
@@ -90,14 +88,13 @@
             font-weight: bold; letter-spacing: 2px; font-size: 18px; line-height: 1; padding-bottom: 8px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
 
-        /* МАГИЯ ТЕКСТА: не улетает за края */
         .story-text-element {
-            position: absolute; z-index: 10; color: #fff; font-size: 15px; font-weight: 600; text-align: left;
+            position: absolute; z-index: 10; color: #fff; font-weight: 600; text-align: left;
             text-shadow: 0 1px 4px rgba(0,0,0,0.8); white-space: pre-wrap; 
             left: 50%; top: 35%; 
             transform: translate(-50%, -50%); 
             width: max-content; max-width: 90%;
-            line-height: 1.4; transition: left 0.1s ease, top 0.1s ease;
+            line-height: 1.4; transition: left 0.1s ease, top 0.1s ease, font-size 0.1s ease;
         }
 
         .story-location-sticker {
@@ -136,7 +133,7 @@
         <div class="controls">
             <h3>Генератор Историй</h3>
 
-            <details class="control-section">
+            <details class="control-section" open>
                 <summary>📚 Персонаж и Фон</summary>
                 <div class="section-content">
                     <select id="characterSelect" style="font-weight: bold; margin-bottom: 10px;" onchange="loadCharacter()">
@@ -149,7 +146,7 @@
                 </div>
             </details>
 
-            <details class="control-section">
+            <details class="control-section" open>
                 <summary>👤 Шапка истории</summary>
                 <div class="section-content">
                     <input type="text" id="storyUsername" placeholder="Имя профиля" value="hj.granger_" oninput="updateStoryHeader()">
@@ -161,7 +158,7 @@
                 </div>
             </details>
 
-            <details class="control-section">
+            <details class="control-section" open>
                 <summary>📝 Текст истории</summary>
                 <div class="section-content">
                     <textarea id="storyTextInput" placeholder="Текст истории..." rows="3" style="font-family: inherit; resize: none;" oninput="updateStoryText()"></textarea>
@@ -175,6 +172,11 @@
                             <option value="Georgia, serif">С засечками (Serif)</option>
                             <option value="'Comic Sans MS', cursive, sans-serif">Маркер (Comic)</option>
                         </select>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <label style="font-size: 11px; color: #aaa;">Размер текста:</label>
+                        <input type="range" id="textSize" min="10" max="100" value="15" style="width: 100%;" oninput="updateStoryText()">
                     </div>
 
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
@@ -313,7 +315,6 @@
             }
         }
 
-        // ОБНОВЛЕННАЯ ЛОГИКА ФОНА (через img.src)
         document.getElementById('bgUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -334,16 +335,17 @@
             bg.style.display = 'none';
         }
 
-        // ОБНОВЛЕННЫЙ ТЕКСТ (теперь со шрифтами)
         function updateStoryText() {
             const textElement = document.getElementById('storyTextDisplay');
             const newText = document.getElementById('storyTextInput').value;
             const color = document.getElementById('textColor').value;
-            const font = document.getElementById('fontSelect').value; // Берем шрифт из селекта
+            const font = document.getElementById('fontSelect').value;
+            const size = document.getElementById('textSize').value; // Берем размер
             
             textElement.innerHTML = newText.replace(/\n/g, '<br>');
             textElement.style.color = color;
-            textElement.style.fontFamily = font; // Применяем шрифт
+            textElement.style.fontFamily = font;
+            textElement.style.fontSize = size + 'px'; // Применяем размер
         }
 
         function updateLocationColors() {
@@ -408,7 +410,6 @@
             }, 100);
         }
 
-        // Запуск функций при загрузке
         updateStoryHeader();
         updateLocation();
         updateStoryText();
