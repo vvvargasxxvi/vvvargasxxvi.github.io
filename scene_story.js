@@ -42,6 +42,25 @@ document.getElementById('bgUpload').addEventListener('change', function(e) {
     }
 });
 
+// Загрузка аватарки с устройства
+document.getElementById('avatarUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const avatarImg = document.getElementById('displayAvatar');
+            const avatarUrlInput = document.getElementById('storyAvatarUrl');
+            
+            // Подставляем картинку в превью
+            avatarImg.src = event.target.result;
+            
+            // Записываем DataURL в текстовое поле (на случай, если захочешь сохранить персонажа)
+            avatarUrlInput.value = event.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
 function clearBackground() {
     document.getElementById('bgUpload').value = '';
     const bg = document.getElementById('storyBackground');
