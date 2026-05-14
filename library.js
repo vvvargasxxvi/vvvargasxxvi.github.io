@@ -28,10 +28,14 @@ function loadCharacter() {
     if (document.getElementById('headerSubtitle')) document.getElementById('headerSubtitle').textContent = char.subtitle || '';
     
     // 2. Если мы в генераторе историй (story.html)
-    if (document.getElementById('storyUsername')) document.getElementById('storyUsername').value = name;
-    if (document.getElementById('storyAvatarUrl')) document.getElementById('storyAvatarUrl').value = char.avatar || '';
-    // Сразу дергаем функцию обновления превью истории, если она есть
-    if (typeof updateStoryHeader === 'function') updateStoryHeader();
+    if (document.getElementById('storyUsername')) {
+        // МАГИЯ ЗДЕСЬ: берем подпись (subtitle). Если она пустая, ставим имя как запасной вариант.
+        document.getElementById('storyUsername').value = char.subtitle || name;
+        document.getElementById('storyAvatarUrl').value = char.avatar || '';
+        
+        // Сразу дергаем функцию обновления превью истории
+        if (typeof updateStoryHeader === 'function') updateStoryHeader();
+    }
 
     // Обновляем глобальные аватарки для чата
     if (typeof currentAvatarSrc !== 'undefined') currentAvatarSrc = char.avatar;
