@@ -29,38 +29,6 @@ function updateStoryHeader() {
     }
 }
 
-document.getElementById('bgUpload').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const bg = document.getElementById('storyBackground');
-            bg.src = event.target.result;
-            bg.style.display = 'block';
-        }
-        reader.readAsDataURL(file);
-    }
-});
-
-// Загрузка аватарки с устройства
-document.getElementById('avatarUpload').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const avatarImg = document.getElementById('displayAvatar');
-            const avatarUrlInput = document.getElementById('storyAvatarUrl');
-            
-            // Подставляем картинку в превью
-            avatarImg.src = event.target.result;
-            
-            // Записываем DataURL в текстовое поле (на случай, если захочешь сохранить персонажа)
-            avatarUrlInput.value = event.target.result;
-        }
-        reader.readAsDataURL(file);
-    }
-});
-
 function clearBackground() {
     document.getElementById('bgUpload').value = '';
     const bg = document.getElementById('storyBackground');
@@ -143,8 +111,44 @@ function downloadStory() {
     }, 100);
 }
 
-// Запуск функций при загрузке страницы
+// --- БЕЗОПАСНЫЙ ЗАПУСК ---
+// Этот блок ждет, пока браузер нарисует все кнопки, и только потом подключает логику загрузки файлов
 document.addEventListener('DOMContentLoaded', () => {
+    
+    // Подключаем кнопку ФОНА
+    const bgUploadBtn = document.getElementById('bgUpload');
+    if (bgUploadBtn) {
+        bgUploadBtn.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const bg = document.getElementById('storyBackground');
+                    bg.src = event.target.result;
+                    bg.style.display = 'block'; // Делаем картинку видимой
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Подключаем кнопку АВАТАРКИ
+    const avatarUploadBtn = document.getElementById('avatarUpload');
+    if (avatarUploadBtn) {
+        avatarUploadBtn.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('displayAvatar').src = event.target.result;
+                    document.getElementById('storyAvatarUrl').value = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Запускаем первичное обновление текста и шапки
     updateStoryHeader();
     updateLocation();
     updateStoryText();
