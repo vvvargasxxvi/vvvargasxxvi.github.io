@@ -136,7 +136,7 @@
         <div class="controls">
             <h3>Генератор Историй</h3>
 
-            <details class="control-section" open>
+            <details class="control-section">
                 <summary>📚 Персонаж и Фон</summary>
                 <div class="section-content">
                     <select id="characterSelect" style="font-weight: bold; margin-bottom: 10px;" onchange="loadCharacter()">
@@ -149,7 +149,7 @@
                 </div>
             </details>
 
-            <details class="control-section" open>
+            <details class="control-section">
                 <summary>👤 Настройки автора</summary>
                 <div class="section-content">
                     <input type="text" id="storyUsername" placeholder="Имя профиля" value="hj.granger_" oninput="updateStoryHeader()">
@@ -170,7 +170,7 @@
                 </div>
             </details>
 
-            <details class="control-section" open>
+            <details class="control-section">
                 <summary>📝 Текст истории</summary>
                 <div class="section-content">
                     <textarea id="storyTextInput" placeholder="Текст истории..." rows="3" style="font-family: inherit; resize: none;" oninput="updateStoryText()"></textarea>
@@ -280,13 +280,6 @@
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                         </div>
                     </div>
-                </div>
-
-                <div id="storyTextDisplay" class="story-text-element">Как бы я не скучала по Хогвартсу,<br>иногда учеба утомляет даже меня 😮‍💨<br><br>Совсем не понимаю эту руну.</div>
-
-                <div id="storyLocationDisplay" class="story-location-sticker">
-                    <svg id="locIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    <span id="locText">Hogwarts School of Witchcraft and Wizardry</span>
                 </div>
             </div>
 
