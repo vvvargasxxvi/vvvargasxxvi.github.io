@@ -983,3 +983,17 @@ body.export-mode .reply-bubble {
 body.export-mode #captureArea {
     background: #0d1015 !important;
 }
+
+body.export-mode,
+body.export-mode * {
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+}
+
+body.export-mode #captureArea {
+    background: #0d1015 !important;
+}
