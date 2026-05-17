@@ -103,19 +103,24 @@ function downloadStory() {
             backgroundColor: '#0b1014' 
         }).then(canvas => {
             if (wasHidden) { document.body.classList.remove('show-preview'); }
-            const link = document.createElement('a'); 
-            link.download = `ig_story_${Date.now()}.png`; 
-            link.href = canvas.toDataURL('image/png'); 
-            link.click();
+            
+            const imageData = canvas.toDataURL('image/png');
+            
+            // Если в ТГ — отправляем в чат. Если на ноуте — скачиваем файлом.
+            if (typeof tg !== 'undefined' && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                sendToBot(imageData, `story_${Date.now()}.png`, "image");
+            } else {
+                const link = document.createElement('a'); 
+                link.download = `story_${Date.now()}.png`; 
+                link.href = imageData; 
+                link.click();
+            }
         });
     }, 100);
 }
 
 // --- БЕЗОПАСНЫЙ ЗАПУСК ---
-// Этот блок ждет, пока браузер нарисует все кнопки, и только потом подключает логику загрузки файлов
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Подключаем кнопку ФОНА
     const bgUploadBtn = document.getElementById('bgUpload');
     if (bgUploadBtn) {
         bgUploadBtn.addEventListener('change', function(e) {
@@ -125,14 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 reader.onload = function(event) {
                     const bg = document.getElementById('storyBackground');
                     bg.src = event.target.result;
-                    bg.style.display = 'block'; // Делаем картинку видимой
+                    bg.style.display = 'block';
                 }
                 reader.readAsDataURL(file);
             }
         });
     }
 
-    // Подключаем кнопку АВАТАРКИ
     const avatarUploadBtn = document.getElementById('avatarUpload');
     if (avatarUploadBtn) {
         avatarUploadBtn.addEventListener('change', function(e) {
@@ -148,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Запускаем первичное обновление текста и шапки
     updateStoryHeader();
     updateLocation();
     updateStoryText();
