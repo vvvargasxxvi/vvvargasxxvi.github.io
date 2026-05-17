@@ -87,7 +87,10 @@ function toggleElements() {
     document.getElementById('gradBottom').style.display = showGradients ? 'block' : 'none';
 }
 
-function downloadStory() {
+function downloadStory(event) {
+    // Блокируем перезагрузку
+    if (event) event.preventDefault();
+
     const phoneWrapper = document.getElementById('captureArea');
     const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
     if (wasHidden) { document.body.classList.add('show-preview'); }
