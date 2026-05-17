@@ -503,21 +503,41 @@
             });
         }
 
-        function downloadChat() {
-            contextMenu.style.display = 'none';
-            const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
-            if (wasHidden) { document.body.classList.add('show-preview'); }
+        function downloadChat(event) {
+    if (event) event.preventDefault();
+    
+    // Скрываем менюшки выбора типа сообщения, если открыты
+    if (typeof contextMenu !== 'undefined' && contextMenu) {
+        contextMenu.style.display = 'none';
+    }
 
-            phoneWrapper.style.borderRadius = '0'; phoneWrapper.style.border = 'none'; phoneWrapper.style.boxShadow = 'none';
+    const phoneWrapper = document.getElementById('captureArea');
+    const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
+    if (wasHidden) { document.body.classList.add('show-preview'); }
+
+    setTimeout(() => {
+        html2canvas(phoneWrapper, { 
+            scale: 3, // Высокое качество
+            useCORS: true, 
+            allowTaint: true, 
+            backgroundColor: '#0b1014' 
+        }).then(canvas => {
+            if (wasHidden) { document.body.classList.remove('show-preview'); }
             
-            setTimeout(() => {
-                html2canvas(phoneWrapper, { scale: 3, useCORS: true, allowTaint: true, backgroundColor: '#0d1015', logging: false }).then(canvas => {
-                    phoneWrapper.style.borderRadius = '40px'; phoneWrapper.style.border = '1px solid #222'; phoneWrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.6)';
-                    if (wasHidden) { document.body.classList.remove('show-preview'); }
-                    const link = document.createElement('a'); link.download = 'ig_chat.png'; link.href = canvas.toDataURL('image/png'); link.click();
-                });
-            }, 100); 
-        }
+            const imageData = canvas.toDataURL('image/png');
+            
+            // Если открыто внутри ТГ — отправляем в личку, иначе — стандартное скачивание
+            if (typeof tg !== 'undefined' && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                sendToBot(imageData, `personal_chat_${Date.now()}.png`, "image");
+            } else {
+                const link = document.createElement('a'); 
+                link.download = `ig_chat_${Date.now()}.png`; 
+                link.href = imageData; 
+                link.click();
+            }
+        });
+    }, 100);
+}
     </script>
 </body>
 </html>
