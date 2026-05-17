@@ -958,3 +958,28 @@ button:active {
         transform: translateY(0);
     }
 }
+
+body.export-mode,
+body.export-mode * {
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+}
+
+body.export-mode .sidebar,
+body.export-mode .controls,
+body.export-mode .context-menu,
+body.export-mode .phone-wrapper,
+body.export-mode .messages,
+body.export-mode .chat-container,
+body.export-mode .msg,
+body.export-mode .reply-bubble {
+    background: #1e1e1e !important;
+}
+
+body.export-mode #captureArea {
+    background: #0d1015 !important;
+}
