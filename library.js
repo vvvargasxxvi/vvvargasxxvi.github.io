@@ -21,16 +21,27 @@ function sendToBot(fileData, fileName, fileType) {
 
     fetch(BACKEND_URL, {
         method: 'POST',
+        redirect: 'follow',
+        headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+        },
         body: JSON.stringify(payload)
     })
-    .then(response => response.json())
+    .then(response => response.json()) // <-- Теперь мы сначала превращаем ответ в понятный объект
     .then(data => {
         tg.MainButton.hide();
-        tg.showAlert('Готово! Файл у тебя в личке 🚀');
+        
+        if (data.status === 'Успех!') {
+            tg.showAlert('Готово! Файл у тебя в личке 🚀');
+        } else {
+            // Если Гугл вернул ошибку, мы выведем её реальный текст
+            tg.showAlert(`Гугл не смог отправить файл: ${data.message || 'Неизвестная ошибка'}`);
+        }
     })
     .catch(err => {
         tg.MainButton.hide();
         tg.showAlert('Блин, ошибка связи с сервером 😢');
+        console.error(err);
     });
 }
 
