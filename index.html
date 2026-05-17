@@ -139,7 +139,7 @@
             <button id="mainActionBtn" onclick="addMessage()">Добавить сообщение</button>
             <div style="display: flex; gap: 10px; margin-top: 5px;">
                 <button onclick="clearChat()" style="background: #333; flex: 1; font-size: 13px;">Очистить</button>
-                <button onclick="downloadChat()" style="background: #fff; color: #000; flex: 1.5; font-size: 13px;">📸 Один скрин</button>
+                <button type="button" onclick="downloadChat(event)" style="...">📸 Скачать скриншот</button>
                 <button id="zipBtn" onclick="downloadChatAsZip('personal')" style="background: #4CAF50; color: #fff; flex: 1.5; font-size: 13px;">📦 Нарезка (ZIP)</button>
             </div>
         </div>
