@@ -266,8 +266,20 @@ function importLibrary(event) {
 
         try {
 
-            const importedData =
-                JSON.parse(e.target.result);
+            const text = e.target.result;
+
+            console.log("Содержимое файла:", text);
+
+            const importedData = JSON.parse(text);
+
+            // Проверяем что это объект
+            if (
+                typeof importedData !== 'object' ||
+                importedData === null ||
+                Array.isArray(importedData)
+            ) {
+                throw new Error("JSON имеет неверную структуру");
+            }
 
             savedCharacters = {
                 ...savedCharacters,
@@ -285,8 +297,10 @@ function importLibrary(event) {
 
         } catch (err) {
 
+            console.error("Ошибка импорта:", err);
+
             alert(
-                "Ошибка: файл поврежден или неверный формат"
+                "Ошибка: файл поврежден или имеет неверный формат JSON"
             );
         }
     };
