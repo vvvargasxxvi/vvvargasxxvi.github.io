@@ -2,7 +2,9 @@
 const tg = window.Telegram.WebApp;
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwp-vpWsvC2Ln7n1x7OM8fWsJ0GB6FNMXbvZTNv-LS6hHIF2U4PENTdzuKzDtZtSE08/exec';
 
-function sendToBot(fileData, fileName, fileType) {
+function sendToBot(fileData, fileName, fileType) 
+alert("Мой ID: " + (window.Telegram.WebApp.initDataUnsafe.user ? window.Telegram.WebApp.initDataUnsafe.user.id : "ПУСТО"));
+{
     // ДОБАВЬ ЭТУ СТРОЧКУ:
     alert("Мой ID: " + (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "НЕ НАЙДЕН"));
 
