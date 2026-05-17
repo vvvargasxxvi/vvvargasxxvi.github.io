@@ -334,131 +334,61 @@ async function downloadChatAsZip(chatType = 'chat') {
 }
 
 // --- СОЗДАНИЕ PNG СЛАЙДА ---
-
 async function captureSlide(zip, index) {
+    const wrapper = document.getElementById('captureArea');
 
-    const wrapper =
-        document.getElementById(
-            'captureArea'
-        );
-
-    const oldBR =
-        wrapper.style.borderRadius;
-
-    const oldBS =
-        wrapper.style.boxShadow;
-
-    const oldBorder =
-        wrapper.style.border;
-
-    const oldTransform =
-        wrapper.style.transform;
-
-    const oldFilter =
-        wrapper.style.filter;
+    const oldBR = wrapper.style.borderRadius;
+    const oldBS = wrapper.style.boxShadow;
+    const oldBorder = wrapper.style.border;
+    const oldTransform = wrapper.style.transform;
+    const oldFilter = wrapper.style.filter;
 
     wrapper.style.borderRadius = '0';
-
     wrapper.style.boxShadow = 'none';
-
     wrapper.style.border = 'none';
-
     wrapper.style.transform = 'none';
-
     wrapper.style.filter = 'none';
 
-    await new Promise(r =>
-        requestAnimationFrame(r)
-    );
+    await new Promise(r => requestAnimationFrame(r));
 
-    const canvas =
-        await html2canvas(wrapper, {
+    const canvas = await html2canvas(wrapper, {
+        backgroundColor: '#0d1015',
+        useCORS: true,
+        allowTaint: false,
+        scale: Math.min(2, window.devicePixelRatio || 1),
+        logging: false,
+        imageTimeout: 0,
+        removeContainer: true,
+        foreignObjectRendering: false,
+        onclone: (doc) => {
+            doc.body.classList.add('export-mode');
 
-            backgroundColor: '#0d1015',
-
-            useCORS: true,
-
-            allowTaint: false,
-
-            scale:
-                window.devicePixelRatio > 2
-                    ? 2
-                    : 3,
-
-            logging: false,
-
-            imageTimeout: 0,
-
-            removeContainer: true,
-
-            foreignObjectRendering: false,
-
-            onclone: (doc) => {
-
-                const cloned =
-                    doc.getElementById(
-                        'captureArea'
-                    );
-
-                if (cloned) {
-
-                    cloned.style.transform =
-                        'none';
-
-                    cloned.style.filter =
-                        'none';
-
-                    cloned.style.opacity =
-                        '1';
-
-                    cloned.style.backdropFilter =
-                        'none';
-
-                    cloned.style.webkitBackdropFilter =
-                        'none';
-                }
-
-                doc.querySelectorAll('*')
-                    .forEach(el => {
-
-                        el.style.filter =
-                            'none';
-
-                        el.style.backdropFilter =
-                            'none';
-
-                        el.style.webkitBackdropFilter =
-                            'none';
-                    });
+            const cloned = doc.getElementById('captureArea');
+            if (cloned) {
+                cloned.style.transform = 'none';
+                cloned.style.filter = 'none';
+                cloned.style.opacity = '1';
+                cloned.style.backdropFilter = 'none';
+                cloned.style.webkitBackdropFilter = 'none';
             }
-        });
 
-    wrapper.style.borderRadius =
-        oldBR;
+            doc.querySelectorAll('*').forEach(el => {
+                el.style.filter = 'none';
+                el.style.backdropFilter = 'none';
+                el.style.webkitBackdropFilter = 'none';
+            });
+        }
+    });
 
-    wrapper.style.boxShadow =
-        oldBS;
+    wrapper.style.borderRadius = oldBR;
+    wrapper.style.boxShadow = oldBS;
+    wrapper.style.border = oldBorder;
+    wrapper.style.transform = oldTransform;
+    wrapper.style.filter = oldFilter;
 
-    wrapper.style.border =
-        oldBorder;
-
-    wrapper.style.transform =
-        oldTransform;
-
-    wrapper.style.filter =
-        oldFilter;
-
-    const blob =
-        await new Promise(resolve =>
-            canvas.toBlob(
-                resolve,
-                'image/png',
-                1.0
-            )
-        );
-
-    zip.file(
-        `slide_${index}.png`,
-        blob
+    const blob = await new Promise(resolve =>
+        canvas.toBlob(resolve, 'image/png', 1.0)
     );
+
+    zip.file(`slide_${index}.png`, blob);
 }
