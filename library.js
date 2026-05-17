@@ -1,63 +1,67 @@
-// --- ИНТЕГРАЦИЯ С TELEGRAM И GOOGLE БЭКЕНДОМ ---
-const tg = window.Telegram.WebApp;
-const BACKEND_URL = 'https://script.google.com/macros/s/AKfycby0aYje6RAIOcqKB4R4fg7ZR65Is4Tu7UYYDGGaQa37Vvn-vFea7uyuUsRKjAgS7RYb/exec';
+// --- TELEGRAM MINI APP ---
+const tg = window.Telegram?.WebApp;
 
-function sendToBot(fileData, fileName, fileType) 
-alert("Мой ID: " + (window.Telegram.WebApp.initDataUnsafe.user ? window.Telegram.WebApp.initDataUnsafe.user.id : "ПУСТО"));
-{
-    // ДОБАВЬ ЭТУ СТРОЧКУ:
-    alert("Мой ID: " + (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "НЕ НАЙДЕН"));
+const BACKEND_URL = 'https://script.google.com/macros/s/ТВОЙ_ID/exec';
 
-    if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-        // ... дальше твой код
-        alert('Бро, открой генератор внутри Телеграма!');
+// Сообщаем Telegram что Mini App готов
+if (tg) {
+    tg.ready();
+    tg.expand();
+}
+
+// ----------------------------
+// ОТПРАВКА В БОТА
+// ----------------------------
+function sendToBot(fileData, fileName, fileType) {
+
+    // Проверяем запуск внутри Telegram
+    if (!tg || !tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+        alert('Открой Mini App внутри Telegram');
         return;
     }
 
-    tg.MainButton.setText('Отправляем в чат...');
+    const userId = tg.initDataUnsafe.user.id;
+
+    console.log("USER ID:", userId);
+
+    tg.MainButton.setText('Отправляем...');
     tg.MainButton.show();
     tg.MainButton.showProgress();
 
     const payload = {
-        chat_id: tg.initDataUnsafe.user.id, 
+        chat_id: userId,
         file: fileData,
         filename: fileName,
-        type: fileType 
+        type: fileType
     };
 
     fetch(BACKEND_URL, {
         method: 'POST',
-        mode: 'no-cors', // <-- Добавляем этот режим для обхода блокировок
         headers: {
             'Content-Type': 'text/plain;charset=utf-8'
         },
         body: JSON.stringify(payload)
     })
-    .then(() => {
-        // В режиме no-cors мы не видим текст ответа, 
-        // поэтому просто надеемся на лучшее и скрываем кнопку
+    .then(async (res) => {
+
         tg.MainButton.hide();
-        tg.showAlert('Запрос отправлен! Если бот молчит — проверь, нажала ли ты Start в самом боте 🚀');
+        tg.MainButton.hideProgress();
+
+        const text = await res.text();
+
+        console.log("Ответ сервера:", text);
+
+        tg.showAlert('Файл отправлен в чат');
     })
-    .catch(err => {
+    .catch((err) => {
+
         tg.MainButton.hide();
-        tg.showAlert(`Ошибка сети: ${err.message}`);
+        tg.MainButton.hideProgress();
+
+        console.error(err);
+
+        tg.showAlert('Ошибка: ' + err.message);
     });
-}
-
-// --- БИБЛИОТЕКА ПЕРСОНАЖЕЙ ---
-let savedCharacters = JSON.parse(localStorage.getItem('ig_dm_characters_v1')) || {};
-
-function updateCharDropdown() {
-    const characterSelect = document.getElementById('characterSelect');
-    if (!characterSelect) return;
-    characterSelect.innerHTML = '<option value="">-- Выбери или создай --</option>';
-    for (let name in savedCharacters) {
-        let opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        characterSelect.appendChild(opt);
-    }
 }
 
 function loadCharacter() {
