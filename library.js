@@ -1,6 +1,6 @@
 // --- ИНТЕГРАЦИЯ С TELEGRAM И GOOGLE БЭКЕНДОМ ---
 const tg = window.Telegram.WebApp;
-const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyqLSfLQWTQ3cGI95EWzPl9B7ZiuWcoTW8bgwAySKZpT8A5FPLDfgG6s7WGnsMJVhPu/exec'; 
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwp-vpWsvC2Ln7n1x7OM8fWsJ0GB6FNMXbvZTNv-LS6hHIF2U4PENTdzuKzDtZtSE08/exec'; 
 
 function sendToBot(fileData, fileName, fileType) {
     if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
