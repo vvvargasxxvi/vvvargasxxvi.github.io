@@ -128,3 +128,95 @@ button:hover { opacity: 0.8; }
     /* Оставляем оригинальные размеры телефона, чтобы скриншоты были идеальными (1170x2532) */
     .phone-wrapper { margin-top: 10px; }
 }
+
+html, body {
+    width: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
+}
+
+body {
+    padding: 10px;
+    gap: 12px;
+    background: #121212;
+}
+
+/* Без теней */
+.sidebar,
+.controls,
+.phone-wrapper,
+.control-section,
+.context-menu,
+button {
+    box-shadow: none !important;
+}
+
+/* Чище и компактнее */
+.sidebar,
+.controls {
+    border-radius: 16px;
+}
+
+.sidebar {
+    padding: 14px;
+}
+
+.controls {
+    padding: 14px;
+}
+
+.controls h3 {
+    font-size: 16px;
+}
+
+input,
+textarea,
+select,
+button {
+    font-size: 16px;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    border-radius: 12px;
+}
+
+/* Телефонный блок — аккуратно в экран */
+.phone-wrapper {
+    width: min(94vw, 375px);
+    height: calc(min(94vw, 375px) * 844 / 390);
+    border-radius: 24px;
+    border: 1px solid #222;
+}
+
+/* Мобилка */
+@media (max-width: 950px) {
+    .sidebar,
+    .controls-container,
+    .mobile-tabs,
+    .phone-container {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .mobile-tabs {
+        display: flex;
+    }
+
+    .phone-container {
+        display: none;
+        justify-content: center;
+        overflow: hidden;
+        padding-bottom: 10px;
+    }
+
+    body.show-preview .controls-container {
+        display: none;
+    }
+
+    body.show-preview .phone-container {
+        display: flex;
+    }
+}
