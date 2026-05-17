@@ -1,6 +1,20 @@
 // --- TELEGRAM MINI APP ---
 const tg = window.Telegram?.WebApp;
 
+function syncTelegramTheme() {
+    if (!tg) return;
+
+    document.body.classList.toggle('telegram-light', tg.colorScheme === 'light');
+    document.body.classList.toggle('telegram-dark', tg.colorScheme !== 'light');
+}
+
+if (tg) {
+    tg.ready();
+    tg.expand();
+    syncTelegramTheme();
+    tg.onEvent('themeChanged', syncTelegramTheme);
+}
+
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycby0aYje6RAIOcqKB4R4fg7ZR65Is4Tu7UYYDGGaQa37Vvn-vFea7uyuUsRKjAgS7RYb/exec';
 
 // Сообщаем Telegram что Mini App готов
