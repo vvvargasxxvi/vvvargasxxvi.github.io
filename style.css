@@ -128,3 +128,224 @@ button:hover { opacity: 0.8; }
     /* Оставляем оригинальные размеры телефона, чтобы скриншоты были идеальными (1170x2532) */
     .phone-wrapper { margin-top: 10px; }
 }
+
+/* =========================
+   TELEGRAM MINI APP UPGRADE
+========================= */
+
+:root {
+    --tg-bg: #121212;
+    --tg-secondary-bg: #1e1e1e;
+    --tg-accent: #0095f6;
+    --tg-text: #ffffff;
+    --tg-hint: #8e8e8e;
+}
+
+/* Плавность */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Улучшенный body */
+body {
+    background: var(--tg-bg);
+    color: var(--tg-text);
+
+    overflow-x: hidden;
+
+    padding:
+        max(20px, env(safe-area-inset-top))
+        max(20px, env(safe-area-inset-right))
+        max(20px, env(safe-area-inset-bottom))
+        max(20px, env(safe-area-inset-left));
+
+    -webkit-font-smoothing: antialiased;
+
+    touch-action: manipulation;
+}
+
+/* TELEGRAM STYLE */
+.sidebar,
+.controls,
+.phone-wrapper {
+    animation: fadeIn 0.25s ease;
+}
+
+/* Glass эффект */
+.controls,
+.sidebar {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* Красивые кнопки */
+button {
+    background: var(--tg-accent);
+
+    color: white;
+
+    border: none;
+
+    border-radius: 12px;
+
+    padding: 12px 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        opacity 0.15s ease,
+        box-shadow 0.2s ease;
+
+    box-shadow:
+        0 4px 12px rgba(0,0,0,0.25);
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:hover {
+    opacity: 0.92;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+/* Input фикс для iOS */
+input,
+textarea,
+select,
+button {
+    font-size: 16px;
+}
+
+/* Более приятные поля */
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    border-radius: 12px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--tg-accent);
+
+    box-shadow:
+        0 0 0 3px rgba(0,149,246,0.15);
+}
+
+/* Скроллбар */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 20px;
+}
+
+/* Карточки */
+.control-section {
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    transition:
+        transform 0.15s ease,
+        border-color 0.2s ease;
+}
+
+.control-section:hover {
+    border-color: #555;
+}
+
+/* Сообщения */
+.msg {
+    transition:
+        transform 0.1s ease,
+        opacity 0.15s ease;
+}
+
+.message-row:active .msg {
+    transform: scale(0.98);
+}
+
+/* PHONE SHADOW */
+.phone-wrapper {
+    box-shadow:
+        0 20px 50px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(255,255,255,0.03);
+}
+
+/* Context menu */
+.context-menu {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* Анимация */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================
+   MOBILE TELEGRAM FIXES
+========================= */
+
+@media (max-width: 950px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .controls-container,
+    .mobile-tabs,
+    .phone-container,
+    .sidebar {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .controls {
+        border-radius: 18px;
+    }
+
+    .phone-container {
+        overflow-x: hidden;
+    }
+
+    .phone-wrapper {
+        transform: scale(0.92);
+        transform-origin: top center;
+
+        margin-top: -20px;
+    }
+
+    .sidebar {
+        border-radius: 18px;
+    }
+
+    .nav-item {
+        border-radius: 12px;
+    }
+
+    .mobile-tabs button {
+        border-radius: 12px;
+    }
+}
