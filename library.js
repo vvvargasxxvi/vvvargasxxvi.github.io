@@ -1,10 +1,10 @@
 // --- ИНТЕГРАЦИЯ С TELEGRAM И GOOGLE БЭКЕНДОМ ---
 const tg = window.Telegram.WebApp;
-const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwp-vpWsvC2Ln7n1x7OM8fWsJ0GB6FNMXbvZTNv-LS6hHIF2U4PENTdzuKzDtZtSE08/exec'; 
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwp-vpWsvC2Ln7n1x7OM8fWsJ0GB6FNMXbvZTNv-LS6hHIF2U4PENTdzuKzDtZtSE08/exec';
 
 function sendToBot(fileData, fileName, fileType) {
     if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-        alert('Бро, чтобы отправить файл в чат, открой генератор внутри Телеграма!');
+        alert('Бро, открой генератор внутри Телеграма!');
         return;
     }
 
@@ -21,32 +21,21 @@ function sendToBot(fileData, fileName, fileType) {
 
     fetch(BACKEND_URL, {
         method: 'POST',
-        redirect: 'follow',
+        mode: 'no-cors', // <-- Добавляем этот режим для обхода блокировок
         headers: {
             'Content-Type': 'text/plain;charset=utf-8'
         },
         body: JSON.stringify(payload)
     })
-    .then(response => response.text()) // Читаем ответ как простой текст, чтобы не давиться HTML-ошибками Гугла
-    .then(text => {
+    .then(() => {
+        // В режиме no-cors мы не видим текст ответа, 
+        // поэтому просто надеемся на лучшее и скрываем кнопку
         tg.MainButton.hide();
-        try {
-            // Пытаемся понять, это нормальный ответ или нет
-            const data = JSON.parse(text);
-            if (data.status === 'Успех!') {
-                tg.showAlert('Готово! Файл у тебя в личке 🚀');
-            } else {
-                tg.showAlert(`Ошибка внутри сервера: ${data.message}`);
-            }
-        } catch (e) {
-            // Если Гугл вернул крякозябры или HTML
-            tg.showAlert(`Странный ответ от Гугла: ${text.substring(0, 150)}...`);
-        }
+        tg.showAlert('Запрос отправлен! Если бот молчит — проверь, нажала ли ты Start в самом боте 🚀');
     })
     .catch(err => {
         tg.MainButton.hide();
-        // Показываем конкретную причину, почему fetch упал
-        tg.showAlert(`Жесткая ошибка сети: ${err.name} - ${err.message}`);
+        tg.showAlert(`Ошибка сети: ${err.message}`);
     });
 }
 
