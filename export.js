@@ -1,3 +1,52 @@
+// --- ЭКСПОРТ И ИМПОРТ БЭКАПОВ ЧАТА (JSON) ---
+
+function exportChat() {
+    const messagesBox = document.getElementById('messagesBox');
+    if (!messagesBox || messagesBox.children.length === 0) {
+        alert('Чат пуст! Сохранять нечего.');
+        return;
+    }
+    
+    // Сохраняем весь HTML чата в объект
+    const chatData = {
+        html: messagesBox.innerHTML
+    };
+    const jsonData = JSON.stringify(chatData);
+
+    // Если открыто внутри ТГ — шлем боту, иначе — скачиваем файлом на комп
+    if (typeof tg !== 'undefined' && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        sendToBot(jsonData, `chat_backup_${Date.now()}.json`, "json");
+    } else {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonData);
+        const link = document.createElement('a');
+        link.href = dataStr;
+        link.download = `chat_backup_${Date.now()}.json`;
+        link.click();
+    }
+}
+
+function importChat(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.html) {
+                document.getElementById('messagesBox').innerHTML = data.html;
+                if (typeof updateVisuals === 'function') updateVisuals();
+                alert("Чат успешно загружен! 🔄");
+            } else {
+                alert("Ошибка: Неверный формат файла.");
+            }
+        } catch (err) {
+            alert("Ошибка: Файл поврежден или имеет неверный формат.");
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; 
+}
+
 // --- УМНАЯ И БЕЗОПАСНАЯ НАРЕЗКА ЧАТА (УНИВЕРСАЛЬНЫЙ МОДУЛЬ) ---
 
 async function downloadChatAsZip(chatType = 'chat') {
@@ -20,7 +69,7 @@ async function downloadChatAsZip(chatType = 'chat') {
         const maxAvailableHeight = 640; 
         const originalScrollTop = messagesBox.scrollTop;
         
-        contextMenu.style.display = 'none';
+        if (contextMenu) contextMenu.style.display = 'none';
         const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
         if (wasHidden) document.body.classList.add('show-preview');
 
