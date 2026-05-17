@@ -14,7 +14,6 @@ if (tg) {
 // ----------------------------
 function sendToBot(fileData, fileName, fileType) {
 
-    // Проверяем запуск внутри Telegram
     if (!tg || !tg.initDataUnsafe || !tg.initDataUnsafe.user) {
         alert('Открой Mini App внутри Telegram');
         return;
@@ -23,10 +22,6 @@ function sendToBot(fileData, fileName, fileType) {
     const userId = tg.initDataUnsafe.user.id;
 
     console.log("USER ID:", userId);
-
-    tg.MainButton.setText('Отправляем...');
-    tg.MainButton.show();
-    tg.MainButton.showProgress();
 
     const payload = {
         chat_id: userId,
@@ -44,23 +39,17 @@ function sendToBot(fileData, fileName, fileType) {
     })
     .then(async (res) => {
 
-        tg.MainButton.hide();
-        tg.MainButton.hideProgress();
-
         const text = await res.text();
 
         console.log("Ответ сервера:", text);
 
-        tg.showAlert('Файл отправлен в чат');
+        alert('Файл отправлен');
     })
     .catch((err) => {
 
-        tg.MainButton.hide();
-        tg.MainButton.hideProgress();
-
         console.error(err);
 
-        tg.showAlert('Ошибка: ' + err.message);
+        alert('Ошибка: ' + err.message);
     });
 }
 
