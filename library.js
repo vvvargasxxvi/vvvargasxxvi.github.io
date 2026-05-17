@@ -27,21 +27,26 @@ function sendToBot(fileData, fileName, fileType) {
         },
         body: JSON.stringify(payload)
     })
-    .then(response => response.json()) // <-- Теперь мы сначала превращаем ответ в понятный объект
-    .then(data => {
+    .then(response => response.text()) // Читаем ответ как простой текст, чтобы не давиться HTML-ошибками Гугла
+    .then(text => {
         tg.MainButton.hide();
-        
-        if (data.status === 'Успех!') {
-            tg.showAlert('Готово! Файл у тебя в личке 🚀');
-        } else {
-            // Если Гугл вернул ошибку, мы выведем её реальный текст
-            tg.showAlert(`Гугл не смог отправить файл: ${data.message || 'Неизвестная ошибка'}`);
+        try {
+            // Пытаемся понять, это нормальный ответ или нет
+            const data = JSON.parse(text);
+            if (data.status === 'Успех!') {
+                tg.showAlert('Готово! Файл у тебя в личке 🚀');
+            } else {
+                tg.showAlert(`Ошибка внутри сервера: ${data.message}`);
+            }
+        } catch (e) {
+            // Если Гугл вернул крякозябры или HTML
+            tg.showAlert(`Странный ответ от Гугла: ${text.substring(0, 150)}...`);
         }
     })
     .catch(err => {
         tg.MainButton.hide();
-        tg.showAlert('Блин, ошибка связи с сервером 😢');
-        console.error(err);
+        // Показываем конкретную причину, почему fetch упал
+        tg.showAlert(`Жесткая ошибка сети: ${err.name} - ${err.message}`);
     });
 }
 
