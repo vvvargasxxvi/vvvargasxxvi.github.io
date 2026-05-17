@@ -157,17 +157,39 @@ async function captureSlide(zip, index) {
     wrapper.style.border = 'none';
 
     const canvas = await html2canvas(wrapper, {
-        scale: 2, 
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#0d1015'
-    });
+    backgroundColor: '#0d1015',
 
-    wrapper.style.borderRadius = oldBR;
-    wrapper.style.boxShadow = oldBS;
-    wrapper.style.border = oldBorder;
+    useCORS: true,
+    allowTaint: true,
 
-    const dataUrl = canvas.toDataURL('image/png');
-    const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
-    zip.file(`slide_${index}.png`, base64Data, {base64: true});
-}
+    scale: 3,
+
+    logging: false,
+
+    removeContainer: true,
+
+    imageTimeout: 0,
+
+    foreignObjectRendering: false,
+
+    onclone: (doc) => {
+
+        const cloned = doc.getElementById(wrapper.id);
+
+        if (cloned) {
+            cloned.style.transform = 'none';
+            cloned.style.filter = 'none';
+            cloned.style.opacity = '1';
+        }
+    }
+});
+
+wrapper.style.borderRadius = oldBR;
+wrapper.style.boxShadow = oldBS;
+wrapper.style.border = oldBorder;
+
+canvas.toBlob((blob) => {
+
+    zip.file(`slide_${index}.png`, blob);
+
+}, 'image/png', 1.0);
