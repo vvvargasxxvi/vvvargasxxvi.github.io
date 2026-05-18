@@ -7,13 +7,9 @@ function exportChat() {
         return;
     }
     
-    // Сохраняем весь HTML чата в объект
-    const chatData = {
-        html: messagesBox.innerHTML
-    };
+    const chatData = { html: messagesBox.innerHTML };
     const jsonData = JSON.stringify(chatData);
 
-    // Если открыто внутри ТГ — шлем боту, иначе — скачиваем файлом на комп
     if (typeof tg !== 'undefined' && tg.initDataUnsafe && tg.initDataUnsafe.user) {
         sendToBot(jsonData, `chat_backup_${Date.now()}.json`, "json");
     } else {
@@ -47,10 +43,9 @@ function importChat(event) {
     event.target.value = ''; 
 }
 
-// --- УМНАЯ И БЕЗОПАСНАЯ НАРЕЗКА ЧАТА (УНИВЕРСАЛЬНЫЙ МОДУЛЬ) ---
+// --- УМНАЯ И БЕЗОПАСНАЯ НАРЕЗКА ЧАТА ---
 
 async function downloadChatAsZip(chatType = 'chat') {
-    // Находим нужные элементы прямо внутри функции
     const messagesBox = document.getElementById('messagesBox');
     const zipBtn = document.getElementById('zipBtn');
     const contextMenu = document.getElementById('contextMenu');
@@ -73,7 +68,6 @@ async function downloadChatAsZip(chatType = 'chat') {
         const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
         if (wasHidden) document.body.classList.add('show-preview');
 
-        // 1. РАСЧЕТ ТОЧЕК СКРОЛЛА
         let slidesScrollTops = [0];
         let currentScroll = 0;
 
@@ -106,14 +100,12 @@ async function downloadChatAsZip(chatType = 'chat') {
 
         const totalSlides = slidesScrollTops.length;
 
-        // 2. ЦИКЛ СКРИНШОТОВ
         for (let i = 0; i < slidesScrollTops.length; i++) {
             let slideIndex = i + 1;
             zipBtn.innerHTML = `⏳ Слайд ${slideIndex}/${totalSlides}...`;
 
             messagesBox.scrollTo(0, slidesScrollTops[i]);
             
-            // Ждем и вызываем пересчет градиента (если функция существует на странице)
             await new Promise(r => setTimeout(r, 250));
             if (typeof updateVisuals === 'function') updateVisuals(); 
             await new Promise(r => setTimeout(r, 100));
@@ -121,7 +113,6 @@ async function downloadChatAsZip(chatType = 'chat') {
             await captureSlide(zip, slideIndex);
         }
 
-        // ВОЗВРАТ В ИСХОДНОЕ СОСТОЯНИЕ
         messagesBox.scrollTo(0, originalScrollTop);
         if (wasHidden) document.body.classList.remove('show-preview');
         if (typeof updateVisuals === 'function') updateVisuals();
@@ -131,13 +122,12 @@ async function downloadChatAsZip(chatType = 'chat') {
         const link = document.createElement('a');
         link.href = URL.createObjectURL(content);
         
-        // Красивое название архива в зависимости от типа чата
         link.download = `instagram_${chatType}_${Date.now()}.zip`;
         link.click();
 
     } catch (err) {
         console.error(err);
-        alert('Произошла ошибка при нарезке. Попробуй еще раз или уменьши количество сообщений.');
+        alert('Произошла ошибка при нарезке.');
     } finally {
         zipBtn.innerHTML = originalBtnText;
         zipBtn.style.opacity = '1';
@@ -145,22 +135,24 @@ async function downloadChatAsZip(chatType = 'chat') {
     }
 }
 
-// Функция для создания самого скриншота
+// --- ЧИСТАЯ ФУНКЦИЯ СКРИНШОТА БЕЗ КОСТЫЛЕЙ ---
 async function captureSlide(zip, index) {
     const wrapper = document.getElementById('captureArea');
     
-    // Вешаем класс-кувалду перед снимком
-    wrapper.classList.add('exporting-now');
-
     const canvas = await html2canvas(wrapper, {
         scale: 2, 
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#0d1015'
+        backgroundColor: '#0d1015',
+        // onclone - это встроенная функция html2canvas. 
+        // Она вносит изменения ТОЛЬКО в саму фотку, сайт вообще не трогается!
+        onclone: function(clonedDoc) {
+            const clonePhone = clonedDoc.getElementById('captureArea');
+            clonePhone.style.setProperty('border-radius', '0', 'important');
+            clonePhone.style.setProperty('border', 'none', 'important');
+            clonePhone.style.setProperty('box-shadow', 'none', 'important');
+        }
     });
-
-    // Снимаем класс, возвращая красоту
-    wrapper.classList.remove('exporting-now');
 
     const dataUrl = canvas.toDataURL('image/png');
     const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
