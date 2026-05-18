@@ -135,7 +135,7 @@ async function downloadChatAsZip(chatType = 'chat') {
     }
 }
 
-// --- ЧИСТАЯ ФУНКЦИЯ СКРИНШОТА БЕЗ КОСТЫЛЕЙ ---
+// Функция для создания самого скриншота
 async function captureSlide(zip, index) {
     const wrapper = document.getElementById('captureArea');
     
@@ -144,13 +144,13 @@ async function captureSlide(zip, index) {
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#0d1015',
-        // onclone - это встроенная функция html2canvas. 
-        // Она вносит изменения ТОЛЬКО в саму фотку, сайт вообще не трогается!
         onclone: function(clonedDoc) {
             const clonePhone = clonedDoc.getElementById('captureArea');
-            clonePhone.style.setProperty('border-radius', '0', 'important');
-            clonePhone.style.setProperty('border', 'none', 'important');
-            clonePhone.style.setProperty('box-shadow', 'none', 'important');
+            if (clonePhone) {
+                clonePhone.style.setProperty('border-radius', '0', 'important');
+                clonePhone.style.setProperty('border', 'none', 'important');
+                clonePhone.style.setProperty('box-shadow', 'none', 'important');
+            }
         }
     });
 
