@@ -340,7 +340,17 @@ function downloadChat(event) {
             scale: 3, 
             useCORS: true, 
             allowTaint: true, 
-            backgroundColor: '#0b1014' 
+            backgroundColor: '#0b1014',
+            // --- НАЧАЛО НОВОГО КУСКА ---
+            onclone: function(clonedDoc) {
+                const clonePhone = clonedDoc.getElementById('captureArea');
+                if (clonePhone) {
+                    clonePhone.style.setProperty('border-radius', '0', 'important');
+                    clonePhone.style.setProperty('border', 'none', 'important');
+                    clonePhone.style.setProperty('box-shadow', 'none', 'important');
+                }
+            }
+            // --- КОНЕЦ НОВОГО КУСКА ---
         }).then(canvas => {
             if (wasHidden) { document.body.classList.remove('show-preview'); }
             
