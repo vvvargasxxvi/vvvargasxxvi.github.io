@@ -47,7 +47,7 @@ button:hover { opacity: 0.8; }
 
 /* ТЕЛЕФОН И ЧАТ */
 .phone-container { display: flex; justify-content: center; }
-.phone-wrapper { width: 390px; height: 844px; background: #0d1015; border-radius: 0px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); overflow: hidden; display: flex; flex-direction: column; border: 1px solid #222; position: relative; flex-shrink: 0; }
+.phone-wrapper { width: 390px; height: 844px; background: #0d1015; border-radius: 0px; box-shadow: 0 10px 0px rgba(0,0,0,0); overflow: hidden; display: flex; flex-direction: column; border: 1px solid #222; position: relative; flex-shrink: 0; }
 .chat-container { flex: 1; display: flex; flex-direction: column; background: transparent; min-height: 0; }
 .top-bar-container { width: 100%; position: relative; background: #0d1015; flex-shrink: 0; display: flex; justify-content: center; align-items: center; }
 .top-bar-container img { width: 100%; display: block; }
