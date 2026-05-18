@@ -148,26 +148,44 @@ async function downloadChatAsZip(chatType = 'chat') {
 // Функция для создания самого скриншота
 async function captureSlide(zip, index) {
     const wrapper = document.getElementById('captureArea');
-    const oldBR = wrapper.style.borderRadius;
+    if (!wrapper) return;
+
+    const oldBR = getComputedStyle(wrapper).borderRadius;
     const oldBS = wrapper.style.boxShadow;
     const oldBorder = wrapper.style.border;
+    const oldOverflow = wrapper.style.overflow;
 
     wrapper.style.borderRadius = '0';
     wrapper.style.boxShadow = 'none';
     wrapper.style.border = 'none';
+    wrapper.style.overflow = 'visible';
+
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     const canvas = await html2canvas(wrapper, {
-        scale: 2, 
+        scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#0d1015'
+        backgroundColor: '#0d1015',
+        onclone: (doc) => {
+            const cloned = doc.getElementById('captureArea');
+            if (cloned) {
+                cloned.style.borderRadius = '0';
+                cloned.style.boxShadow = 'none';
+                cloned.style.border = 'none';
+                cloned.style.overflow = 'visible';
+            }
+        }
     });
 
     wrapper.style.borderRadius = oldBR;
     wrapper.style.boxShadow = oldBS;
     wrapper.style.border = oldBorder;
+    wrapper.style.overflow = oldOverflow;
 
-    const dataUrl = canvas.toDataURL('image/png');
-    const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
-    zip.file(`slide_${index}.png`, base64Data, {base64: true});
+    const blob = await new Promise(resolve =>
+        canvas.toBlob(resolve, 'image/png', 1.0)
+    );
+
+    zip.file(`slide_${index}.png`, blob);
 }
