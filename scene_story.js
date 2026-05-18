@@ -103,7 +103,17 @@ function downloadStory(event) {
             scale: exportScale, 
             useCORS: true, 
             allowTaint: true, 
-            backgroundColor: '#0b1014' 
+            backgroundColor: '#0b1014',
+            // --- ДОБАВЛЕННЫЙ БЛОК ONCLONE ---
+            onclone: function(clonedDoc) {
+                const clonePhone = clonedDoc.getElementById('captureArea');
+                if (clonePhone) {
+                    clonePhone.style.setProperty('border-radius', '0', 'important');
+                    clonePhone.style.setProperty('border', 'none', 'important');
+                    clonePhone.style.setProperty('box-shadow', 'none', 'important');
+                }
+            }
+            // --- КОНЕЦ БЛОКА ---
         }).then(canvas => {
             if (wasHidden) { document.body.classList.remove('show-preview'); }
             
