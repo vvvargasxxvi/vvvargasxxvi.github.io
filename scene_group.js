@@ -272,7 +272,17 @@ function downloadChat(event) {
             scale: 3, 
             useCORS: true, 
             allowTaint: true, 
-            backgroundColor: '#0d1015' 
+            backgroundColor: '#0d1015',
+            // --- ДОБАВЛЕННЫЙ БЛОК ONCLONE ---
+            onclone: function(clonedDoc) {
+                const clonePhone = clonedDoc.getElementById('captureArea');
+                if (clonePhone) {
+                    clonePhone.style.setProperty('border-radius', '0', 'important');
+                    clonePhone.style.setProperty('border', 'none', 'important');
+                    clonePhone.style.setProperty('box-shadow', 'none', 'important');
+                }
+            }
+            // --- КОНЕЦ БЛОКА ---
         }).then(canvas => {
             if (wasHidden) { document.body.classList.remove('show-preview'); }
             
