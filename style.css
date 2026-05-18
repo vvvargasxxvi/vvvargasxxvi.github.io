@@ -220,8 +220,3 @@ textarea {
         display: flex;
     }
 }
-
-/* Когда идет экспорт, жестко убираем углы ВООБЩЕ у всего внутри captureArea */
-.exporting-now, .exporting-now * {
-    border-radius: 0 !important;
-}
