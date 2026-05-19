@@ -309,17 +309,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
 });
 
-// --- ЛОГИКА БИБЛИОТЕКИ ГРУПП ---
+// --- ЛОГИКА БИБЛИОТЕКИ ГРУПП (ПОЛНАЯ ВЕРСИЯ С ИМПОРТОМ/ЭКСПОРТОМ) ---
 document.addEventListener('DOMContentLoaded', () => {
     const groupSelect = document.getElementById('groupLibrarySelect');
     const saveBtn = document.getElementById('saveGroupBtn');
     const deleteBtn = document.getElementById('deleteGroupBtn');
+    const exportLibBtn = document.getElementById('exportGroupLibBtn');
+    const importLibBtn = document.getElementById('importGroupLibBtn');
+    const importLibInput = document.getElementById('importGroupLibInput');
     
-    // Автоматически подстраиваемся под возможные ID твоих инпутов
-    const groupNameInput = document.getElementById('groupName') || document.getElementById('groupNameInput');
-    const groupAvatarInput = document.getElementById('groupAvatar') || document.getElementById('groupAvatarInput');
+    const groupNameInput = document.getElementById('groupName');
+    const avTopInput = document.getElementById('avTop');
+    const avBottomInput = document.getElementById('avBottom');
     
-    // Функция загрузки списка групп в выпадающий список
+    // Функция загрузки списка групп в селект
     function loadGroupLibrary() {
         const groups = JSON.parse(localStorage.getItem('group_chat_library')) || {};
         groupSelect.innerHTML = '<option value="">-- Выберите группу --</option>';
@@ -332,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // При выборе группы из списка — автозаполнение полей
+    // При выборе группы
     groupSelect.addEventListener('change', () => {
         const selectedName = groupSelect.value;
         if (!selectedName) return;
@@ -341,58 +344,103 @@ document.addEventListener('DOMContentLoaded', () => {
         const groupData = groups[selectedName];
 
         if (groupData) {
-            if (groupNameInput) {
-                groupNameInput.value = groupData.name;
-                groupNameInput.dispatchEvent(new Event('input')); // Триггерим обновление текста
-            }
-            if (groupAvatarInput) {
-                groupAvatarInput.value = groupData.avatar;
-                groupAvatarInput.dispatchEvent(new Event('input')); // Триггерим обновление картинки
-            }
+            if (groupNameInput) { groupNameInput.value = groupData.name; groupNameInput.dispatchEvent(new Event('input')); }
+            if (avTopInput) { avTopInput.value = groupData.avTop || ''; avTopInput.dispatchEvent(new Event('input')); }
+            if (avBottomInput) { avBottomInput.value = groupData.avBottom || ''; avBottomInput.dispatchEvent(new Event('input')); }
             
-            // Вызываем твои функции обновления интерфейса, если они есть
             if (typeof updateHeader === 'function') updateHeader();
-            if (typeof updateVisuals === 'function') updateVisuals();
         }
     });
 
-    // Сохранение текущей заполненной группы
+    // Сохранение группы
     saveBtn.addEventListener('click', () => {
         const name = groupNameInput ? groupNameInput.value.trim() : '';
-        const avatar = groupAvatarInput ? groupAvatarInput.value.trim() : '';
+        const avTop = avTopInput ? avTopInput.value.trim() : '';
+        const avBottom = avBottomInput ? avBottomInput.value.trim() : '';
 
         if (!name) {
-            alert('Сначала введи название группы в поле ввода!');
+            alert('Сначала введи название группы!');
             return;
         }
 
         const groups = JSON.parse(localStorage.getItem('group_chat_library')) || {};
-        groups[name] = { name: name, avatar: avatar };
+        groups[name] = { name: name, avTop: avTop, avBottom: avBottom };
         
         localStorage.setItem('group_chat_library', JSON.stringify(groups));
         loadGroupLibrary();
         groupSelect.value = name;
-        alert(`Группа "${name}" успешно сохранена в библиотеку! 🔥`);
+        alert(`Группа "${name}" сохранена! 🔥`);
     });
 
-    // Удаление выбранной группы
+    // Удаление группы
     deleteBtn.addEventListener('click', () => {
         const selectedName = groupSelect.value;
-        if (!selectedName) {
-            alert('Сначала выбери группу из списка, которую хочешь удалить!');
-            return;
-        }
+        if (!selectedName) return alert('Выбери группу для удаления!');
 
-        if (confirm(`Удалить группу "${selectedName}" из библиотеки?`)) {
+        if (confirm(`Удалить группу "${selectedName}" из базы?`)) {
             const groups = JSON.parse(localStorage.getItem('group_chat_library')) || {};
             delete groups[selectedName];
             
             localStorage.setItem('group_chat_library', JSON.stringify(groups));
             loadGroupLibrary();
-            alert('Группа удалена из базы.');
+            alert('Группа удалена.');
         }
     });
 
-    // Первичный запуск при загрузке страницы
+    // ЭКСПОРТ БАЗЫ (Скачивание файла или отправка боту)
+    exportLibBtn.addEventListener('click', () => {
+        const groups = localStorage.getItem('group_chat_library');
+        if (!groups || groups === '{}') {
+            alert('Твоя база групп пуста, сохранять нечего!');
+            return;
+        }
+
+        // Если открыто в Телеграме — шлем файл напрямую в чат через нашего бота
+        if (typeof tg !== 'undefined' && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            sendToBot(groups, `group_library_${Date.now()}.json`, "json");
+        } else {
+            // Если на ноуте в обычном браузере — качаем файлом
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(groups);
+            const link = document.createElement('a');
+            link.href = dataStr;
+            link.download = `group_library_${Date.now()}.json`;
+            link.click();
+        }
+    });
+
+    // ИМПОРТ БАЗЫ (Чтение файла и слияние со старой базой)
+    importLibBtn.addEventListener('click', () => {
+        importLibInput.click();
+    });
+
+    importLibInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const importedGroups = JSON.parse(evt.target.result);
+                if (typeof importedGroups === 'object' && importedGroups !== null && !Array.isArray(importedGroups)) {
+                    const existingGroups = JSON.parse(localStorage.getItem('group_chat_library')) || {};
+                    
+                    // Умное слияние: старые группы не затрутся, новые добавятся
+                    const mergedGroups = { ...existingGroups, ...importedGroups };
+                    
+                    localStorage.setItem('group_chat_library', JSON.stringify(mergedGroups));
+                    loadGroupLibrary();
+                    alert('База групп успешно загружена и объединена! 🔄');
+                } else {
+                    alert('Ошибка: Неверный формат файла библиотеки.');
+                }
+            } catch (err) {
+                alert('Ошибка при чтении файла бэкапа.');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // Сброс инпута
+    });
+
+    // Запуск при старте страницы
     loadGroupLibrary();
 });
