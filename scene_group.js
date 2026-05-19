@@ -308,3 +308,91 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSenderList();
     document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
 });
+
+// --- ЛОГИКА БИБЛИОТЕКИ ГРУПП ---
+document.addEventListener('DOMContentLoaded', () => {
+    const groupSelect = document.getElementById('groupLibrarySelect');
+    const saveBtn = document.getElementById('saveGroupBtn');
+    const deleteBtn = document.getElementById('deleteGroupBtn');
+    
+    // Автоматически подстраиваемся под возможные ID твоих инпутов
+    const groupNameInput = document.getElementById('groupName') || document.getElementById('groupNameInput');
+    const groupAvatarInput = document.getElementById('groupAvatar') || document.getElementById('groupAvatarInput');
+    
+    // Функция загрузки списка групп в выпадающий список
+    function loadGroupLibrary() {
+        const groups = JSON.parse(localStorage.getItem('group_chat_library')) || {};
+        groupSelect.innerHTML = '<option value="">-- Выберите группу --</option>';
+        
+        Object.keys(groups).forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            groupSelect.appendChild(option);
+        });
+    }
+
+    // При выборе группы из списка — автозаполнение полей
+    groupSelect.addEventListener('change', () => {
+        const selectedName = groupSelect.value;
+        if (!selectedName) return;
+
+        const groups = JSON.parse(localStorage.getItem('group_chat_library')) || {};
+        const groupData = groups[selectedName];
+
+        if (groupData) {
+            if (groupNameInput) {
+                groupNameInput.value = groupData.name;
+                groupNameInput.dispatchEvent(new Event('input')); // Триггерим обновление текста
+            }
+            if (groupAvatarInput) {
+                groupAvatarInput.value = groupData.avatar;
+                groupAvatarInput.dispatchEvent(new Event('input')); // Триггерим обновление картинки
+            }
+            
+            // Вызываем твои функции обновления интерфейса, если они есть
+            if (typeof updateHeader === 'function') updateHeader();
+            if (typeof updateVisuals === 'function') updateVisuals();
+        }
+    });
+
+    // Сохранение текущей заполненной группы
+    saveBtn.addEventListener('click', () => {
+        const name = groupNameInput ? groupNameInput.value.trim() : '';
+        const avatar = groupAvatarInput ? groupAvatarInput.value.trim() : '';
+
+        if (!name) {
+            alert('Сначала введи название группы в поле ввода!');
+            return;
+        }
+
+        const groups = JSON.parse(localStorage.getItem('group_chat_library')) || {};
+        groups[name] = { name: name, avatar: avatar };
+        
+        localStorage.setItem('group_chat_library', JSON.stringify(groups));
+        loadGroupLibrary();
+        groupSelect.value = name;
+        alert(`Группа "${name}" успешно сохранена в библиотеку! 🔥`);
+    });
+
+    // Удаление выбранной группы
+    deleteBtn.addEventListener('click', () => {
+        const selectedName = groupSelect.value;
+        if (!selectedName) {
+            alert('Сначала выбери группу из списка, которую хочешь удалить!');
+            return;
+        }
+
+        if (confirm(`Удалить группу "${selectedName}" из библиотеки?`)) {
+            const groups = JSON.parse(localStorage.getItem('group_chat_library')) || {};
+            delete groups[selectedName];
+            
+            localStorage.setItem('group_chat_library', JSON.stringify(groups));
+            loadGroupLibrary();
+            alert('Группа удалена из базы.');
+        }
+    });
+
+    // Первичный запуск при загрузке страницы
+    loadGroupLibrary();
+});
