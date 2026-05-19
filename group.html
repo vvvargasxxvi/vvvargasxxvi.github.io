@@ -31,6 +31,17 @@
         <div class="controls">
             <h3 class="group-title">Групповой чат (Final)</h3>
 
+            <div class="settings-section" style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #232830;">
+                <h4 style="margin-top: 0; margin-bottom: 8px; color: #f0f3f5;">Библиотека групп 📦</h4>
+                <select id="groupLibrarySelect" style="width: 100%; padding: 8px; background: #1a1f26; color: #fff; border: 1px solid #3a3f47; border-radius: 6px; margin-bottom: 8px; cursor: pointer;">
+                    <option value="">-- Выберите группу --</option>
+                </select>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" id="saveGroupBtn" style="flex: 1; padding: 6px; background: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Сохранить текущую</button>
+                    <button type="button" id="deleteGroupBtn" style="flex: 1; padding: 6px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Удалить</button>
+                </div>
+            </div>
+
             <details class="control-section">
                 <summary>👥 Настройки группы</summary>
                 <div class="section-content">
