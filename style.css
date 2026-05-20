@@ -220,3 +220,69 @@ textarea {
         display: flex;
     }
 }
+
+/* Полное размытие или удаление грязных теней на текстах в историях */
+.story-text, .story-message-text, #captureArea [style*="text-shadow"] {
+    text-shadow: 0px 2px 6px rgba(0, 0, 0, 0.25) !important; /* Супер-мягкая, реалистичная тень */
+}
+
+/* Если хочешь вообще ПОЛНОСТЬЮ убрать любые тени под текстом, раскомментируй строчку ниже: */
+/* .story-text { text-shadow: none !important; } */
+
+/* КРАСИВЫЕ И СТАБИЛЬНЫЕ КНОПКИ МЕНЮ (ACCORDION UI) */
+.control-section {
+    background: #161b22 !important;
+    border: 1px solid #21262d !important;
+    border-radius: 8px !important;
+    margin-bottom: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Шапка кнопки */
+.control-section summary {
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #c9d1d9 !important;
+    background: #21262d !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    outline: none !important;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.control-section summary:hover {
+    background: #282e38 !important;
+    color: #f0f6fc !important;
+}
+
+/* Внутренний контейнер при открытии — убираем разьезды */
+.control-section .section-content {
+    padding: 16px !important;
+    background: #0d1117 !important;
+    border-top: 1px solid #21262d !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important; /* Аккуратные отступы между инпутами */
+}
+
+/* Стилизуем инпуты внутри секций, чтобы они не слипались */
+.control-section .section-content input[type="text"],
+.control-section .section-content textarea,
+.control-section .section-content select {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px !important;
+    background: #161b22 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 6px !important;
+    color: #f0f6fc !important;
+    font-size: 13px !important;
+}
+
+.control-section .section-content input[type="text"]:focus,
+.control-section .section-content textarea:focus {
+    border-color: #58a6ff !important;
+    outline: none !important;
+}
