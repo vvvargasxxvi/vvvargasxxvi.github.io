@@ -4,13 +4,13 @@
     <meta charset="UTF-8"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram Story Generator</title>
-    <link rel="stylesheet" href="style.css?v=152">
+    <link rel="stylesheet" href="style.css?v=195">
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
-    <script src="library.js?v=152" defer></script>
-    <script src="scene_story.js?v=152" defer></script>
+    <script src="library.js?v=195" defer></script>
+    <script src="scene_story.js?v=195" defer></script>
 
     <style>
         .phone-wrapper {
@@ -24,108 +24,32 @@
             overflow: hidden;
             border-radius: 0 !important; 
         }
-
-        .top-dark-space {
-            height: 65px;
-            width: 100%;
-            background-color: #0B1014;
-        }
-
-        .story-photo-area {
-            flex: 1;
-            width: 100%;
-            background-color: #1a1a1a;
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .story-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: 1;
-        }
-
-        .story-gradient-top {
-            position: absolute; top: 0; left: 0; 
-            width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0px, rgba(0,0,0,0) 150px);
-            z-index: 2; pointer-events: none;
-        }
-        
-        .story-gradient-bottom {
-            position: absolute; top: 0; left: 0; 
-            width: 100%; height: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.6) 0px, rgba(0,0,0,0) 110px);
-            z-index: 2; pointer-events: none;
-        }
-
-        .story-header-area {
-            position: absolute; top: 15px; left: 0; width: 100%; z-index: 10; padding: 0 16px; box-sizing: border-box;
-        }
-        .story-progress {
-            width: 100%; height: 2px; background: rgba(255,255,255,0.3); margin-bottom: 12px; overflow: hidden; border-radius: 1px;
-        }
-        .story-progress-bar {
-            width: 50%; height: 100%; background: #fff; border-radius: 1px;
-        }
-        .story-header-user {
-            display: flex; align-items: center; gap: 10px;
-        }
-        .story-avatar {
-            width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2);
-        }
-        .story-username-block {
-            display: flex; flex-direction: column; flex: 1;
-        }
-        .story-username {
-            color: #fff; font-size: 13px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 6px;
-        }
-        .story-time {
-            color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 400; text-shadow: none;
-        }
-        .story-music {
-            color: #fff; font-size: 11px; margin-top: 2px; display: flex; align-items: center; gap: 4px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-        }
-        .story-actions {
-            display: flex; align-items: center; gap: 12px; color: #fff;
-        }
-        .story-dots {
-            font-weight: bold; letter-spacing: 2px; font-size: 18px; line-height: 1; padding-bottom: 8px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-        }
-
-        .story-text-element {
-            position: absolute; z-index: 10; color: #fff; font-weight: 600; text-align: left;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.8); white-space: pre-wrap; 
-            left: 50%; top: 35%; 
-            transform: translate(-50%, -50%); 
-            width: max-content; max-width: 90%;
-            line-height: 1.4; transition: left 0.1s ease, top 0.1s ease, font-size 0.1s ease;
-        }
-
-        .story-location-sticker {
-            position: absolute; z-index: 10; left: 50%; top: 50%; transform: translateX(-50%);
-            background: #f7e6df; color: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 6px;
-            display: flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            transition: left 0.1s ease, top 0.1s ease;
-        }
-
-        .bottom-image-bar {
-            width: 100%;
-            background: #0b1014;
-            margin-top: -2px; 
-        }
-        .bottom-image-bar img {
-            width: 100%;
-            display: block;
-        }
+        .top-dark-space { height: 65px; width: 100%; background-color: #0B1014; }
+        .story-photo-area { flex: 1; width: 100%; background-color: #1a1a1a; border-radius: 10px; position: relative; overflow: hidden; }
+        .story-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        .story-gradient-top { position: absolute; top: 0; left: 0; width: 100%; height: 150px; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); z-index: 2; pointer-events: none; }
+        .story-gradient-bottom { position: absolute; bottom: 0; left: 0; width: 100%; height: 110px; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); z-index: 2; pointer-events: none; }
+        .story-header-area { position: absolute; top: 15px; left: 0; width: 100%; z-index: 10; padding: 0 16px; box-sizing: border-box; }
+        .story-progress { width: 100%; height: 2px; background: rgba(255,255,255,0.3); margin-bottom: 12px; overflow: hidden; border-radius: 1px; }
+        .story-progress-bar { width: 50%; height: 100%; background: #fff; border-radius: 1px; }
+        .story-header-user { display: flex; align-items: center; gap: 10px; }
+        .story-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); }
+        .story-username-block { display: flex; flex-direction: column; flex: 1; }
+        .story-username { color: #fff; font-size: 13px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 6px; }
+        .story-time { color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 400; }
+        .story-music { color: #fff; font-size: 11px; margin-top: 2px; display: flex; align-items: center; gap: 4px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        .story-dots { font-weight: bold; font-size: 18px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        .story-text-element { position: absolute; z-index: 10; color: #fff; font-weight: 600; text-align: left; text-shadow: 0 1px 4px rgba(0,0,0,0.8); white-space: pre-wrap; left: 50%; top: 35%; transform: translate(-50%, -50%); width: max-content; max-width: 90%; cursor: grab; }
+        .story-location-sticker { position: absolute; z-index: 10; left: 50%; top: 50%; transform: translateX(-50%); background: #f7e6df; color: #000; font-family: sans-serif; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 6px; display: flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: grab; }
+        .bottom-image-bar { width: 100%; background: #0b1014; }
+        .bottom-image-bar img { width: 100%; display: block; }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <div class="sidebar-title">Выбор режима</div>
-        <a href="index.html" class="nav-item">👤 Личный (1 на 1)</a>
-        <a href="group.html" class="nav-item">👥 Групповой чат</a>
+        <a href="index.html" class="nav-item">👤 Личный</a>
+        <a href="group.html" class="nav-item">👥 Группа</a>
         <a href="story.html" class="nav-item active">📸 Истории</a>
     </div>
 
@@ -137,156 +61,69 @@
     <div class="controls-container">
         <div class="controls">
             <h3>Генератор Историй</h3>
-
             <details class="control-section">
                 <summary>📚 Персонаж и Фон</summary>
                 <div class="section-content">
-                    <select id="characterSelect" style="font-weight: bold; margin-bottom: 10px;" onchange="loadCharacter()">
-                        <option value="">-- Выбери из базы --</option>
-                    </select>
-                    
-                    <span style="font-size: 12px; color: #aaa; margin-bottom: 4px; display: block;">Задний фон истории:</span>
-                    <input type="file" id="bgUpload" accept="image/*" style="font-size: 13px; margin-bottom: 5px;">
-                    <button type="button" onclick="clearBackground()" style="background: #333; font-size: 12px; padding: 5px;">Удалить фон</button>
+                    <input type="file" id="bgUpload" accept="image/*">
+                    <button type="button" onclick="clearBackground()" style="background: #333; font-size: 12px; margin-top:5px;">Удалить фон</button>
                 </div>
             </details>
-
             <details class="control-section">
                 <summary>👤 Настройки автора</summary>
                 <div class="section-content">
                     <input type="text" id="storyUsername" placeholder="Имя профиля" value="hj.granger_" oninput="updateStoryHeader()">
-                    
-                    <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px;">
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" id="storyAvatarUrl" placeholder="URL Аватарки" value="https://i.pravatar.cc/150?img=35" style="flex: 2;" oninput="updateStoryHeader()">
-                            <input type="text" id="storyTime" placeholder="Время" value="51 с." style="flex: 1;" oninput="updateStoryHeader()">
-                        </div>
-                        
-                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-                            <span style="font-size: 11px; color: #aaa;">Или загрузи файл:</span>
-                            <input type="file" id="avatarUpload" accept="image/*" style="font-size: 11px; flex: 1;">
-                        </div>
-                    </div>
-                    
-                    <input type="text" id="storyMusic" placeholder="Трек (Oldies Playing...)" value="Oldies Playing · Quiet Comfort >" style="margin-top: 8px;" oninput="updateStoryHeader()">
+                    <input type="text" id="storyAvatarUrl" placeholder="URL Аватарки" value="https://i.pravatar.cc/150?img=35" oninput="updateStoryHeader()">
+                    <input type="text" id="storyTime" placeholder="Время" value="51 с." oninput="updateStoryHeader()">
                 </div>
             </details>
-
             <details class="control-section">
                 <summary>📝 Текст истории</summary>
                 <div class="section-content">
-                    <textarea id="storyTextInput" placeholder="Текст истории..." rows="3" style="font-family: inherit; resize: none;" oninput="updateStoryText()"></textarea>
-                    
-                    <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
-                        <input type="color" id="textColor" value="#ffffff" style="width: 30px; height: 30px; padding: 0; border: none; border-radius: 4px; cursor: pointer;" onchange="updateStoryText()">
-                        
-                        <select id="fontSelect" onchange="updateStoryText()" style="flex: 1; font-size: 12px; padding: 5px; border-radius: 4px; background: #222; color: #fff; border: 1px solid #444;">
-                            <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">Классика (System)</option>
-                            <option value="'Courier New', Courier, monospace">Печатная машинка (Typewriter)</option>
-                            <option value="Georgia, serif">С засечками (Serif)</option>
-                            <option value="'Comic Sans MS', cursive, sans-serif">Маркер (Comic)</option>
-                        </select>
-                    </div>
+                    <textarea id="storyTextInput" placeholder="Текст..." oninput="updateStoryText()"></textarea>
+                    <input type="color" id="textColor" value="#ffffff" onchange="updateStoryText()">
+                    <select id="fontSelect" onchange="updateStoryText()">
+                        <option value="sans-serif">Классика</option>
+                        <option value="monospace">Печатная машинка</option>
+                    </select>
                 </div>
             </details>
-
             <details class="control-section">
-                <summary>📍 Стикер геолокации</summary>
+                <summary>📍 Геолокация</summary>
                 <div class="section-content">
-                    <input type="text" id="locationInput" placeholder="Геолокация (напр. Hogwarts...)" value="Hogwarts School of Witchcraft and Wizardry" oninput="updateLocation()">
-                    
-                    <div style="display: flex; gap: 10px; margin-top: 8px;">
-                        <div style="flex: 1; display: flex; align-items: center; gap: 6px;">
-                            <input type="color" id="locBgColor" value="#f7e6df" style="width: 25px; height: 25px; padding: 0; border: none; border-radius: 4px; cursor: pointer;" oninput="updateLocationColors()">
-                            <span style="font-size: 11px; color: #aaa;">Фон стикера</span>
-                        </div>
-                        <div style="flex: 1; display: flex; align-items: center; gap: 6px;">
-                            <input type="color" id="locTextColor" value="#000000" style="width: 25px; height: 25px; padding: 0; border: none; border-radius: 4px; cursor: pointer;" oninput="updateLocationColors()">
-                            <span style="font-size: 11px; color: #aaa;">Цвет текста</span>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <div style="flex: 1;">
-                            <label style="font-size: 11px; color: #aaa;">Локация X:</label>
-                            <input type="range" id="locPosX" min="5" max="95" value="50" style="width: 100%;" oninput="updatePosition('storyLocationDisplay', 'locPosX', 'locPosY')">
-                        </div>
-                        <div style="flex: 1;">
-                            <label style="font-size: 11px; color: #aaa;">Локация Y:</label>
-                            <input type="range" id="locPosY" min="15" max="85" value="50" style="width: 100%;" oninput="updatePosition('storyLocationDisplay', 'locPosX', 'locPosY')">
-                        </div>
-                    </div>
-                    <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer; margin-top: 10px;">
-                        <input type="checkbox" id="showLocation" unchecked onchange="updateLocation()"> Показывать стикер геолокации
-                    </label>
+                    <input type="text" id="locationInput" placeholder="Место..." oninput="updateLocation()">
+                    <input type="checkbox" id="showLocation" checked onchange="updateLocation()"> Показывать
                 </div>
             </details>
-
-            <details class="control-section">
-                <summary>⚙️ Элементы интерфейса</summary>
-                <div class="section-content">
-                    <label style="font-size: 13px; display: flex; align-items: center; gap: 6px; color: #aaa; cursor: pointer; margin-top: 5px;">
-                        <input type="checkbox" id="showTopHeader" checked onchange="toggleElements()"> Показывать автора и прогресс
-                    </label>
-                </div>
-            </details>
-
-            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
-
-            <button type="button" onclick="downloadStory(event)" style="background: #fff; color: #000; font-size: 14px; padding: 10px; width: 100%;">📸 Скачать Историю</button>
+            <button type="button" onclick="downloadStory(event)" style="background: #fff; color: #000; padding: 10px; width: 100%;">📸 Скачать</button>
         </div>
     </div>
 
     <div class="phone-container">
-
-        <div class="phone-container" style="position: relative;">
-        
         <div class="ig-slider-container">
             <input type="range" id="igTextSizeSlider" min="12" max="100" value="24">
         </div>
-        
         <div class="phone-wrapper" id="captureArea">
-            
             <div class="top-dark-space"></div>
-
             <div class="story-photo-area">
                 <img id="storyBackground" class="story-bg" style="display: none;" crossorigin="anonymous">
                 <div class="story-gradient-top" id="gradTop"></div>
                 <div class="story-gradient-bottom" id="gradBottom"></div>
-
                 <div class="story-header-area" id="headerUI">
                     <div class="story-progress"><div class="story-progress-bar"></div></div>
                     <div class="story-header-user">
                         <img id="displayAvatar" class="story-avatar" src="https://i.pravatar.cc/150?img=35" crossorigin="anonymous">
                         <div class="story-username-block">
-                            <div class="story-username">
-                                <span id="displayUsername">hj.granger_</span>
-                                <span id="displayTime" class="story-time">51 с.</span>
-                            </div>
-                            <div class="story-music" id="musicContainer">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><rect x="4" y="10" width="3" height="8" rx="1"/><rect x="10" y="5" width="3" height="13" rx="1"/><rect x="16" y="12" width="3" height="6" rx="1"/></svg>
-                                <span id="displayMusic">Oldies Playing · Quiet Comfort ></span>
-                            </div>
-                        </div>
-                        <div class="story-actions">
-                            <div class="story-dots">...</div>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            <div class="story-username"><span id="displayUsername">hj.granger_</span> <span id="displayTime" class="story-time">51 с.</span></div>
                         </div>
                     </div>
                 </div>
-
                 <div id="storyTextDisplay" class="story-text-element">Текст</div>
-
                 <div id="storyLocationDisplay" class="story-location-sticker">
-                    <svg id="locIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <svg id="locIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     <span id="locText">Локация</span>
                 </div>
             </div>
-
-            <div class="bottom-image-bar" id="bottomBarUI">
-                <img src="https://i.postimg.cc/xCd5VcVR/bottom-bar-story.png" crossorigin="anonymous">
-            </div>
-
+            <div class="bottom-image-bar"><img src="https://i.postimg.cc/xCd5VcVR/bottom-bar-story.png" crossorigin="anonymous"></div>
         </div>
     </div>
 </body>
