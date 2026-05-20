@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
     <title>Instagram Group Chat Generator - Pro Mode Final</title>
-    <link rel="stylesheet" href="style.css?v=151">
+    <link rel="stylesheet" href="style.css?v=152">
     
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -31,21 +31,25 @@
         <div class="controls">
             <h3 class="group-title">Групповой чат (Final)</h3>
 
-            <div class="settings-section" style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #232830;">
-                <h4 style="margin-top: 0; margin-bottom: 8px; color: #f0f3f5;">Библиотека групп 📦</h4>
-                <select id="groupLibrarySelect" style="width: 100%; padding: 8px; background: #1a1f26; color: #fff; border: 1px solid #3a3f47; border-radius: 6px; margin-bottom: 8px; cursor: pointer;">
-                    <option value="">-- Выберите группу --</option>
-                </select>
-                <div style="display: flex; gap: 8px;">
-                    <button type="button" id="saveGroupBtn" style="flex: 1; padding: 6px; background: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">Сохранить текущую</button>
-                    <button type="button" id="deleteGroupBtn" style="flex: 1; padding: 6px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">Удалить</button>
+            <details class="control-section">
+                <summary>📦 Библиотека групп</summary>
+                <div class="section-content">
+                    <select id="groupLibrarySelect" style="width: 100%; padding: 8px; background: #1a1f26; color: #fff; border: 1px solid #3a3f47; border-radius: 6px; margin-bottom: 8px; cursor: pointer;">
+                        <option value="">-- Выберите группу --</option>
+                    </select>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="saveGroupBtn" style="flex: 1; padding: 6px; background: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">Сохранить текущую</button>
+                        <button type="button" id="deleteGroupBtn" style="flex: 1; padding: 6px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">Удалить</button>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button type="button" id="exportGroupLibBtn" style="flex: 1; padding: 6px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">📥 Экспорт базы</button>
+                        <input type="file" id="importGroupLibInput" accept=".json" style="display: none;">
+                        <label for="importGroupLibInput" style="flex: 1; padding: 6px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; text-align: center; display: flex; align-items: center; justify-content: center; margin: 0;">
+                            📤 Импорт базы
+                        </label>
+                    </div>
                 </div>
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button type="button" id="exportGroupLibBtn" style="flex: 1; padding: 6px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">📥 Экспорт базы</button>
-                    <input type="file" id="importGroupLibInput" accept=".json" style="display: none;">
-                    <button type="button" id="importGroupLibBtn" style="flex: 1; padding: 6px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">📤 Импорт базы</button>
-                </div>
-            </div>
+            </details>
 
             <details class="control-section">
                 <summary>👥 Настройки группы</summary>
