@@ -132,6 +132,74 @@ function downloadStory(event) {
     }, 100);
 }
 
+// --- ДРАГ-Н-ДРОП ДЛЯ ТЕКСТА И ЛОКАЦИИ ---
+function makeDraggable(elementId, xSliderId, ySliderId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    const parent = el.parentElement; // Область фотографии
+    const xSlider = document.getElementById(xSliderId);
+    const ySlider = document.getElementById(ySliderId);
+
+    let isDragging = false;
+    el.style.cursor = 'grab';
+
+    function onMove(e) {
+        if (!isDragging) return;
+        e.preventDefault(); // Блокируем скролл страницы на телефоне во время перетаскивания
+
+        // Берем координаты мыши или пальца
+        let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+        // Вычисляем положение относительно контейнера
+        let rect = parent.getBoundingClientRect();
+        let x = ((clientX - rect.left) / rect.width) * 100;
+        let y = ((clientY - rect.top) / rect.height) * 100;
+
+        // Ограничиваем, чтобы не улетало за края (от 0 до 100%)
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+
+        // Двигаем элемент
+        el.style.left = x + '%';
+        el.style.top = y + '%';
+
+        // Синхронизируем визуальные ползунки в меню
+        if (xSlider) xSlider.value = x;
+        if (ySlider) ySlider.value = y;
+    }
+
+    function onEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        el.style.transition = 'left 0.1s ease, top 0.1s ease'; // Возвращаем плавность для ползунков
+        el.style.cursor = 'grab';
+        
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+    }
+
+    function onStart(e) {
+        isDragging = true;
+        el.style.transition = 'none'; // Отключаем CSS-задержку, чтобы текст не отставал от пальца
+        el.style.cursor = 'grabbing';
+        
+        // Вешаем слушатели на весь экран, чтобы палец/курсор не "соскальзывал" с текста
+        document.addEventListener('mousemove', onMove, { passive: false });
+        document.addEventListener('mouseup', onEnd);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', onEnd);
+    }
+
+    // Слушаем начало касания/клика на самом элементе
+    el.addEventListener('mousedown', onStart);
+    el.addEventListener('touchstart', onStart, { passive: true });
+}
+
 // --- БЕЗОПАСНЫЙ ЗАПУСК ---
 document.addEventListener('DOMContentLoaded', () => {
     const bgUploadBtn = document.getElementById('bgUpload');
@@ -168,4 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStoryHeader();
     updateLocation();
     updateStoryText();
+    
+    makeDraggable('storyTextDisplay', 'textPosX', 'textPosY');
+    makeDraggable('storyLocationDisplay', 'locPosX', 'locPosY');
 });
