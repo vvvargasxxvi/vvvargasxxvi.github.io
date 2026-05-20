@@ -286,3 +286,28 @@ textarea {
     border-color: #58a6ff !important;
     outline: none !important;
 }
+
+/* ЖЕСТКИЙ ФИКС СЖАТИЯ МЕНЮ В ГАРМОШКУ */
+.controls-container, .controls {
+    max-height: 100vh !important;    /* Ограничиваем панель высотой экрана */
+    overflow-y: auto !important;     /* Включаем вертикальный ползунок прокрутки */
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.control-section {
+    flex-shrink: 0 !important;       /* ЗАПРЕЩАЕМ элементам меню сжиматься по вертикали! */
+    margin-bottom: 10px !important;
+}
+
+/* Красивый тонкий скроллбар для панели настроек, чтобы не мозолил глаза */
+.controls::-webkit-scrollbar {
+    width: 6px !important;
+}
+.controls::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+.controls::-webkit-scrollbar-thumb {
+    background: #30363d !important;
+    border-radius: 4px !important;
+}
