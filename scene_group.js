@@ -315,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveBtn = document.getElementById('saveGroupBtn');
     const deleteBtn = document.getElementById('deleteGroupBtn');
     const exportLibBtn = document.getElementById('exportGroupLibBtn');
-    const importLibBtn = document.getElementById('importGroupLibBtn');
     const importLibInput = document.getElementById('importGroupLibInput');
     
     const groupNameInput = document.getElementById('groupName');
@@ -408,10 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ИМПОРТ БАЗЫ (Чтение файла и слияние со старой базой)
-    importLibBtn.addEventListener('click', () => {
-        importLibInput.click();
-    });
+    // ИМПОРТ БАЗЫ
 
     importLibInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
