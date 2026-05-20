@@ -316,3 +316,22 @@ textarea {
         display: none !important;
     }
 }
+
+/* === КРАСИВЫЙ ПРЕМИАЛЬНЫЙ СКРОЛЛБАР ДЛЯ ПАНЕЛИ === */
+.controls::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.controls::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1) !important;
+    border-radius: 8px !important;
+}
+
+.controls::-webkit-scrollbar-thumb {
+    background: #30363d !important;
+    border-radius: 8px !important;
+}
+
+.controls::-webkit-scrollbar-thumb:hover {
+    background: #484f58 !important;
+}
