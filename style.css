@@ -288,36 +288,31 @@ textarea {
 }
 
 /* ЖЕСТКИЙ ФИКС СЖАТИЯ МЕНЮ В ГАРМОШКУ */
-.controls-container, .controls {
-    max-height: 100vh !important;    /* Ограничиваем панель высотой экрана */
-    overflow-y: auto !important;     /* Включаем вертикальный ползунок прокрутки */
+/* ИСПРАВЛЕННЫЙ ФИКС СЖАТИЯ МЕНЮ (не ломает мобилку) */
+.controls {
+    max-height: 100vh !important;    
+    overflow-y: auto !important;     
     display: flex !important;
     flex-direction: column !important;
 }
 
-.control-section {
-    flex-shrink: 0 !important;       /* ЗАПРЕЩАЕМ элементам меню сжиматься по вертикали! */
-    margin-bottom: 10px !important;
-}
-
-/* Красивый тонкий скроллбар для панели настроек, чтобы не мозолил глаза */
-.controls::-webkit-scrollbar {
-    width: 6px !important;
-}
-.controls::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1) !important;
-}
-.controls::-webkit-scrollbar-thumb {
-    background: #30363d !important;
-    border-radius: 4px !important;
-}
-
-/* ЗАПРЕЩАЕМ СЖИМАТЬСЯ ВООБЩЕ ВСЕМ ЭЛЕМЕНТАМ ПАНЕЛИ НАСТРОЕК */
 .controls > * {
     flex-shrink: 0 !important;
 }
 
-/* На всякий случай даем полю ввода жесткую минимальную высоту, чтобы оно всегда было удобным */
+/* На всякий случай даем полю ввода жесткую минимальную высоту */
 #messageInput {
     min-height: 70px !important;
+}
+
+/* ЖЕЛЕЗОБЕТОННАЯ ЛОГИКА ДЛЯ МОБИЛОК */
+@media (max-width: 950px) {
+    /* Если включено превью - 100% прячем настройки */
+    body.show-preview .controls-container {
+        display: none !important;
+    }
+    /* Если превью выключено - 100% прячем телефон */
+    body:not(.show-preview) .phone-container {
+        display: none !important;
+    }
 }
