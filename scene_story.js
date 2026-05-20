@@ -237,12 +237,12 @@ document.addEventListener('DOMContentLoaded', () => {
     updateLocation();
     updateStoryText();
     
-    // --- ИНТЕРАКТИВНОЕ УПРАВЛЕНИЕ НА ЭКРАНЕ (ТОЛЬКО ПЕРЕМЕЩЕНИЕ) ---
+// --- ИНТЕРАКТИВНОЕ УПРАВЛЕНИЕ НА ЭКРАНЕ (ТАCКАНИЕ) ---
 function makeElementInteractive(elementId) {
     const el = document.getElementById(elementId);
     if (!el) return;
 
-    const parent = el.parentElement; // Область экрана телефона
+    const parent = el.parentElement; 
     let isDragging = false;
 
     function onMove(e) {
@@ -288,19 +288,69 @@ function makeElementInteractive(elementId) {
     el.addEventListener('touchstart', onStart, { passive: true });
 }
 
-// --- ОБНОВЛЕННЫЙ БЛОК ЗАПУСКА ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ---
+// --- ФУНКЦИЯ СКАЧИВАНИЯ ИСТОРИИ (С СКРЫТИЕМ ПОЛЗУНКА) ---
+function downloadStory(event) {
+    if (event) event.preventDefault();
+
+    const phoneWrapper = document.getElementById('captureArea');
+    const wasHidden = document.body.classList.contains('show-preview') === false && window.innerWidth <= 950;
+    if (wasHidden) { document.body.classList.add('show-preview'); }
+
+    const targetWidth = 1173;
+    const exportScale = targetWidth / phoneWrapper.offsetWidth;
+
+    setTimeout(() => {
+        html2canvas(phoneWrapper, { 
+            scale: exportScale, 
+            useCORS: true, 
+            allowTaint: true, 
+            backgroundColor: '#0b1014',
+            onclone: function(clonedDoc) {
+                // Прячем рамки телефона при экспорте
+                const clonePhone = clonedDoc.getElementById('captureArea');
+                if (clonePhone) {
+                    clonePhone.style.setProperty('border-radius', '0', 'important');
+                    clonePhone.style.setProperty('border', 'none', 'important');
+                    clonePhone.style.setProperty('box-shadow', 'none', 'important');
+                }
+                // ЖЕСТКО УБИРАЕМ ПОЛЗУНОК ИЗ СКРИНШОТА
+                const cloneSlider = clonedDoc.querySelector('.ig-slider-container');
+                if (cloneSlider) {
+                    cloneSlider.style.setProperty('display', 'none', 'important');
+                }
+            }
+        }).then(canvas => {
+            if (wasHidden) { document.body.classList.remove('show-preview'); }
+            
+            const imageData = canvas.toDataURL('image/png');
+            
+            if (typeof tg !== 'undefined' && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                sendToBot(imageData, `story_${Date.now()}.png`, "image");
+            } else {
+                const link = document.createElement('a'); 
+                link.download = `story_${Date.now()}.png`; 
+                link.href = imageData; 
+                link.click();
+            }
+        });
+    }, 100);
+}
+
+// --- ЗАПУСК ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ---
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof updateStoryHeader === 'function') updateStoryHeader();
     if (typeof updateLocation === 'function') updateLocation();
     if (typeof updateStoryText === 'function') updateStoryText();
 
-    // Вешаем таскание
+    // Включаем таскание (проверяет оба возможных ID)
+    makeElementInteractive('storyText');
     makeElementInteractive('storyTextDisplay');
+    makeElementInteractive('storyLocation');
     makeElementInteractive('storyLocationDisplay');
 
-    // --- ПОДКЛЮЧАЕМ ИНСТАГРАМОВСКИЙ ПОЛЗУНОК ---
+    // Привязываем ползунок размера к тексту
     const igSlider = document.getElementById('igTextSizeSlider');
-    const storyText = document.getElementById('storyTextDisplay');
+    const storyText = document.getElementById('storyText') || document.getElementById('storyTextDisplay');
 
     if (igSlider && storyText) {
         igSlider.addEventListener('input', (e) => {
