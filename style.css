@@ -311,3 +311,13 @@ textarea {
     background: #30363d !important;
     border-radius: 4px !important;
 }
+
+/* ЗАПРЕЩАЕМ СЖИМАТЬСЯ ВООБЩЕ ВСЕМ ЭЛЕМЕНТАМ ПАНЕЛИ НАСТРОЕК */
+.controls > * {
+    flex-shrink: 0 !important;
+}
+
+/* На всякий случай даем полю ввода жесткую минимальную высоту, чтобы оно всегда было удобным */
+#messageInput {
+    min-height: 70px !important;
+}
