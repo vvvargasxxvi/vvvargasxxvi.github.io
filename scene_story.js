@@ -237,6 +237,74 @@ document.addEventListener('DOMContentLoaded', () => {
     updateLocation();
     updateStoryText();
     
-    makeDraggable('storyTextDisplay', 'textPosX', 'textPosY');
-    makeDraggable('storyLocationDisplay', 'locPosX', 'locPosY');
+    // --- ИНТЕРАКТИВНОЕ УПРАВЛЕНИЕ НА ЭКРАНЕ (ТОЛЬКО ПЕРЕМЕЩЕНИЕ) ---
+function makeElementInteractive(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    const parent = el.parentElement; // Область экрана телефона
+    let isDragging = false;
+
+    function onMove(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+
+        let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+        let rect = parent.getBoundingClientRect();
+        let x = ((clientX - rect.left) / rect.width) * 100;
+        let y = ((clientY - rect.top) / rect.height) * 100;
+
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+
+        el.style.left = x + '%';
+        el.style.top = y + '%';
+    }
+
+    function onEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        el.style.cursor = 'grab';
+        
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+    }
+
+    function onStart(e) {
+        isDragging = true;
+        el.style.cursor = 'grabbing';
+        
+        document.addEventListener('mousemove', onMove, { passive: false });
+        document.addEventListener('mouseup', onEnd);
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', onEnd);
+    }
+
+    el.addEventListener('mousedown', onStart);
+    el.addEventListener('touchstart', onStart, { passive: true });
+}
+
+// --- ОБНОВЛЕННЫЙ БЛОК ЗАПУСКА ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ---
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof updateStoryHeader === 'function') updateStoryHeader();
+    if (typeof updateLocation === 'function') updateLocation();
+    if (typeof updateStoryText === 'function') updateStoryText();
+
+    // Вешаем таскание
+    makeElementInteractive('storyTextDisplay');
+    makeElementInteractive('storyLocationDisplay');
+
+    // --- ПОДКЛЮЧАЕМ ИНСТАГРАМОВСКИЙ ПОЛЗУНОК ---
+    const igSlider = document.getElementById('igTextSizeSlider');
+    const storyText = document.getElementById('storyTextDisplay');
+
+    if (igSlider && storyText) {
+        igSlider.addEventListener('input', (e) => {
+            storyText.style.fontSize = e.target.value + 'px';
+        });
+    }
 });
