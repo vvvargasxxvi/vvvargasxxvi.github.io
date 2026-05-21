@@ -368,45 +368,41 @@ function downloadChat(event) {
     }, 100);
 }
 
-// --- ОЖИВЛЕНИЕ СООБЩЕНИЙ ПОСЛЕ ИМПОРТА БЭКАПА ---
+// --- ИСПРАВЛЕННОЕ ОЖИВЛЕНИЕ СООБЩЕНИЙ ПОСЛЕ ИМПОРТА ---
 function rebindAllMessages() {
+    // 1. Оживляем обычные сообщения (текст и картинки)
     const rows = document.querySelectorAll('.message-row');
-    
     rows.forEach(row => {
-        // Ищем саму плашку сообщения внутри строки (текст или картинку)
-        const msg = row.querySelector('.msg') || row.querySelector('.image-msg');
-        
-        // Если это разделитель времени или пустой блок - пропускаем
-        if (!msg) return; 
+        row.onclick = function(e) {
+            e.stopPropagation(); 
+            selectedMsgRow = this; // Используем правильную переменную твоего движка!
+            
+            const wrapperRect = phoneWrapper.getBoundingClientRect();
+            let x = e.clientX - wrapperRect.left; 
+            let y = e.clientY - wrapperRect.top;
+            if (x > 220) x -= 160; 
+            
+            contextMenu.style.display = 'block'; 
+            contextMenu.style.left = x + 'px'; 
+            contextMenu.style.top = y + 'px';
+        };
+    });
 
-        // Клонируем элемент. Это хитрый трюк, чтобы стереть любые возможные "задвоившиеся" старые слушатели
-        const newMsg = msg.cloneNode(true);
-        msg.parentNode.replaceChild(newMsg, msg);
-
-        let pressTimer;
-
-        // 1. Логика для ПК (Правый клик мыши)
-        newMsg.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            activeMessage = row; // Привязываем контекстное меню к этой строке
-            contextMenu.style.display = 'block';
-            contextMenu.style.left = e.pageX + 'px';
-            contextMenu.style.top = e.pageY + 'px';
-        });
-
-        // 2. Логика для Мобилок (Удержание пальцем)
-        newMsg.addEventListener('touchstart', (e) => {
-            pressTimer = setTimeout(() => {
-                activeMessage = row;
-                contextMenu.style.display = 'block';
-                const touch = e.touches[0];
-                contextMenu.style.left = touch.pageX + 'px';
-                contextMenu.style.top = touch.pageY + 'px';
-            }, 500); // 500 миллисекунд = полсекунды удержания
-        }, { passive: true });
-
-        // Если палец убрали или сдвинули раньше времени - отменяем открытие меню
-        newMsg.addEventListener('touchend', () => clearTimeout(pressTimer));
-        newMsg.addEventListener('touchmove', () => clearTimeout(pressTimer));
+    // 2. Оживляем разделители времени (они у тебя тоже кликабельные!)
+    const dividers = document.querySelectorAll('.time-divider');
+    dividers.forEach(div => {
+        div.onclick = function(e) {
+            e.stopPropagation(); 
+            selectedMsgRow = this;
+            
+            const wrapperRect = phoneWrapper.getBoundingClientRect();
+            let x = e.clientX - wrapperRect.left; 
+            let y = e.clientY - wrapperRect.top;
+            if (x > 220) x -= 160; 
+            
+            contextMenu.style.display = 'block'; 
+            contextMenu.style.left = x + 'px'; 
+            contextMenu.style.top = y + 'px';
+        };
     });
 }
