@@ -378,25 +378,3 @@ textarea {
         left: 5px;
     }
 }
-
-/* === РЕАКЦИИ НА СООБЩЕНИЯХ === */
-.msg, .image-msg {
-    position: relative !important; /* Важно, чтобы бейдж позиционировался относительно самого пузыря */
-}
-
-.msg-reaction {
-    position: absolute;
-    bottom: -10px;       /* Сдвигаем вниз за край сообщения */
-    right: 15px;         /* По умолчанию висит справа */
-    background: #262626; /* Темный фон инсты */
-    border: 2px solid #000; /* Черная рамка, чтобы сливалось с фоном чата */
-    border-radius: 12px;
-    padding: 2px 6px;
-    font-size: 13px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-}
