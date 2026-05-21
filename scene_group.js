@@ -440,3 +440,42 @@ document.addEventListener('DOMContentLoaded', () => {
     // Запуск при старте страницы
     loadGroupLibrary();
 });
+
+// --- ИСПРАВЛЕННОЕ ОЖИВЛЕНИЕ СООБЩЕНИЙ ПОСЛЕ ИМПОРТА ---
+function rebindAllMessages() {
+    // 1. Оживляем обычные сообщения (текст и картинки)
+    const rows = document.querySelectorAll('.message-row');
+    rows.forEach(row => {
+        row.onclick = function(e) {
+            e.stopPropagation(); 
+            selectedMsgRow = this; // Используем правильную переменную твоего движка!
+            
+            const wrapperRect = phoneWrapper.getBoundingClientRect();
+            let x = e.clientX - wrapperRect.left; 
+            let y = e.clientY - wrapperRect.top;
+            if (x > 220) x -= 160; 
+            
+            contextMenu.style.display = 'block'; 
+            contextMenu.style.left = x + 'px'; 
+            contextMenu.style.top = y + 'px';
+        };
+    });
+
+    // 2. Оживляем разделители времени (они у тебя тоже кликабельные!)
+    const dividers = document.querySelectorAll('.time-divider');
+    dividers.forEach(div => {
+        div.onclick = function(e) {
+            e.stopPropagation(); 
+            selectedMsgRow = this;
+            
+            const wrapperRect = phoneWrapper.getBoundingClientRect();
+            let x = e.clientX - wrapperRect.left; 
+            let y = e.clientY - wrapperRect.top;
+            if (x > 220) x -= 160; 
+            
+            contextMenu.style.display = 'block'; 
+            contextMenu.style.left = x + 'px'; 
+            contextMenu.style.top = y + 'px';
+        };
+    });
+}
