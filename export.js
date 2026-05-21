@@ -31,16 +31,21 @@ function importChat(event) {
             if (data.html) {
                 document.getElementById('messagesBox').innerHTML = data.html;
                 if (typeof updateVisuals === 'function') updateVisuals();
+                
+                // --- ВОТ ЭТА СТРОЧКА ОЖИВЛЯЕТ СООБЩЕНИЯ ---
+                if (typeof rebindAllMessages === 'function') rebindAllMessages();
+                
                 alert("Чат успешно загружен! 🔄");
             } else {
                 alert("Ошибка: Неверный формат файла.");
             }
-        } catch (err) {
-            alert("Ошибка: Файл поврежден или имеет неверный формат.");
+        } catch(err) {
+            console.error(err);
+            alert("Ошибка при чтении файла.");
         }
     };
     reader.readAsText(file);
-    event.target.value = ''; 
+    event.target.value = '';
 }
 
 // --- УМНАЯ И БЕЗОПАСНАЯ НАРЕЗКА ЧАТА ---
