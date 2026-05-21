@@ -261,43 +261,6 @@ function handleEdit() {
     if (window.innerWidth <= 950) { toggleMobileTab('controls'); }
 }
 
-// --- ФУНКЦИИ РЕАКЦИЙ ---
-function addReaction(emoji) {
-    if (!selectedMsgRow) return;
-
-    // Ищем сам пузырь с текстом или картинкой внутри выбранной строки
-    const msgBubble = selectedMsgRow.querySelector('.msg') || selectedMsgRow.querySelector('.image-msg');
-    if (!msgBubble) {
-        contextMenu.style.display = 'none';
-        return;
-    }
-
-    // Проверяем, есть ли уже реакция
-    let reactionBadge = msgBubble.querySelector('.msg-reaction');
-    
-    // Если нет — создаем новую
-    if (!reactionBadge) {
-        reactionBadge = document.createElement('div');
-        reactionBadge.className = 'msg-reaction';
-        msgBubble.appendChild(reactionBadge);
-    }
-    
-    // Меняем эмодзи
-    reactionBadge.textContent = emoji;
-    contextMenu.style.display = 'none'; // Прячем меню
-}
-
-function removeReaction() {
-    if (!selectedMsgRow) return;
-    
-    const msgBubble = selectedMsgRow.querySelector('.msg') || selectedMsgRow.querySelector('.image-msg');
-    if (msgBubble) {
-        const badge = msgBubble.querySelector('.msg-reaction');
-        if (badge) badge.remove(); // Удаляем элемент реакции
-    }
-    contextMenu.style.display = 'none'; // Прячем меню
-}
-
 function handleDelete() {
     if (!selectedMsgRow) return;
     contextMenu.style.display = 'none';
